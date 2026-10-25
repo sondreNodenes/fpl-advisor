@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 from pathlib import Path
 
 import joblib
@@ -18,7 +19,7 @@ from fpl_advisor import features, ingest
 
 log = logging.getLogger(__name__)
 
-MODEL_PATH = Path("models/model.joblib")
+MODEL_PATH = Path(os.environ.get("FPL_MODEL_PATH", "models/model.joblib"))
 # Status codes that mean the player will not play: injured, suspended, unavailable, not in squad.
 _OUT_STATUSES = {"i", "s", "u", "n"}
 

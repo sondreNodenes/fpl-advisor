@@ -144,10 +144,8 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def latest_snapshot(data_dir: Path = ingest.DATA_DIR) -> Path | None:
-    snapshots = sorted(
-        p for p in (data_dir / "snapshots").glob("gw=*") if p.is_dir() and p.suffix != ".tmp"
-    )
-    return snapshots[-1] if snapshots else None
+    done = sorted(p.parent for p in (data_dir / "snapshots").glob(f"gw=*/{ingest.DONE_MARKER}"))
+    return done[-1] if done else None
 
 
 def load_history(data_dir: Path = ingest.DATA_DIR) -> pd.DataFrame:

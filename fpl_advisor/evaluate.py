@@ -35,7 +35,7 @@ def ep_next_baseline(data_dir: Path) -> pd.DataFrame:
     frames = []
     for folder in sorted((data_dir / "snapshots").glob("gw=*")):
         path = folder / "players.parquet"
-        if folder.suffix != ".tmp" and path.exists():
+        if (folder / ingest.DONE_MARKER).exists() and path.exists():
             p = pd.read_parquet(path, columns=["season", "player_id", "ep_next_gw", "ep_next"])
             frames.append(p.rename(columns={"ep_next_gw": "round"}))
     if not frames:

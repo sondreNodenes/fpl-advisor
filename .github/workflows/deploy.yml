@@ -1,0 +1,65 @@
+name: Deploy
+
+# Runs on pushes to main once the GCP repository variables are set (see README "Deploy").
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write # for Workload Identity Federation
+
+env:
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  REGION: europe-north1
+
+jobs:
+  deploy:
+    if: vars.GCP_PROJECT_ID != ''
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v3
+
+      - name: Build and push image
+        id: image
+        run: |
+          IMAGE="$REGION-docker.pkg.dev/$PROJECT_ID/fpl-advisor/app:${GITHUB_SHA::12}"
+          gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "ref=$IMAGE" >> "$GITHUB_OUTPUT"
+
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.5.7"
+          terraform_wrapper: false
+
+      - name: Terraform plan
+        working-directory: infra/app
+        run: |
+          terraform init -input=false -backend-config="bucket=$PROJECT_ID-tfstate"
+          terraform plan -input=false -no-color -out=tfplan \
+            -var="project_id=$PROJECT_ID" -var="image=${{ steps.image.outputs.ref }}"
+
+      - name: Terraform apply
+        working-directory: infra/app
+        run: terraform apply -input=false -no-color tfplan
+
+      - name: Smoke test /health
+        working-directory: infra/app
+        run: |
+          URL=$(terraform output -raw url)
+          curl --fail --silent --show-error --retry 5 --retry-delay 5 "$URL/health"
+          echo "Deployed: $URL"

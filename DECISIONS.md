@@ -26,3 +26,10 @@ One line per decision: decision — reason.
 - Added `GET /predictions` (top players by position) — the page needs "predicted points for every player" without returning ~670 rows on every `/recommend`.
 - Kept `httpx` for FastAPI's TestClient and silenced Starlette's deprecation warning — the suggested replacement package was not verified, so not installed.
 - MCP server uses `mcp` 2.x `MCPServer` (FastMCP was renamed in 2.x) over stdio — what Claude Desktop and Claude Code launch locally.
+- GCS bucket mounted into Cloud Run as a volume (Cloud Storage FUSE) instead of a storage SDK — no extra dependency and the code keeps using local paths.
+- Snapshots finish with a `_SUCCESS` marker instead of a directory rename — renames are not atomic on GCS FUSE.
+- Cloud Scheduler in `europe-west1` — it is not offered in `europe-north1` (checked docs.cloud.google.com/scheduler/docs/locations); it triggers the `europe-north1` job cross-region.
+- Two Terraform roots: `bootstrap` (human, once: IAM, WIF, registry, bucket) and `app` (CI) — CI's deployer never needs IAM admin rights.
+- `pipeline.py` retrains only when a new snapshot lands — frequent matchday triggers stay cheap (one bootstrap request).
+- Terraform 1.5.7 pinned in CI to match the local version the configs were validated with; Google provider ~> 8.0 (lock file 8.8.1).
+- GitHub Actions bumped to current majors (checkout v7, setup-uv v10, auth v3, setup-gcloud v3, setup-terraform v4) — fixes the Node 20 deprecation warnings.

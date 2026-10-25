@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -29,7 +28,7 @@ class Advice:
 
 
 class Advisor:
-    """Loads the model and latest snapshot once; predictions are cached per gameweek."""
+    """Predictions are cached per (snapshot, gameweek); a new snapshot also reloads the model."""
 
     def __init__(
         self,
@@ -37,10 +36,9 @@ class Advisor:
         data_dir: Path | None = None,
         model_path: Path | None = None,
     ) -> None:
-        self.data_dir = Path(data_dir or os.environ.get("FPL_DATA_DIR", ingest.DATA_DIR))
-        self.model_path = Path(model_path or os.environ.get("FPL_MODEL_PATH", model.MODEL_PATH))
-        self.client = client or api.FPLClient(cache_dir=self.data_dir / "cache", ttl_seconds=900)
-        self._model = None
+        self.data_dir = Path(data_dir or ingest.DATA_DIR)
+        self.model_path = Path(model_path or model.MODEL_PATH)
+        self.client = client or api.FPLClient(cache_dir=ingest.CACHE_DIR, ttl_seconds=900)
         self._cache: dict[tuple[str, int], pd.DataFrame] = {}
         self._lock = threading.Lock()
 
@@ -61,10 +59,9 @@ class Advisor:
         key = (snap.name, target)
         with self._lock:
             if key not in self._cache:
-                if self._model is None:
-                    self._model = model.load(self.model_path)["model"]
+                fitted = model.load(self.model_path)["model"]  # retrained with each snapshot
                 players = api.parse_players(bootstrap)
-                preds = model.predict_gameweek(self._model, snap, target, players=players)
+                preds = model.predict_gameweek(fitted, snap, target, players=players)
                 teams = api.parse_teams(bootstrap).set_index("team")["short_name"]
                 preds["team_name"] = preds["team"].map(teams)
                 self._cache = {key: preds}  # keep only the latest gameweek
