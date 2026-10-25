@@ -63,6 +63,17 @@ Python 3.12 release manager, set by the official `python` image to verify the Py
 download. Nothing to rotate; `.gitleaks.toml` allows that exact value in `security/*/trivy-image.json`
 only.
 
+### Live check (deployed service, 2026-10-25)
+
+A handful of requests against the owner's own deployment after the phase 5 deploy (the deploy
+job's Trivy gate passed):
+
+- `curl -sI $URL/`: CSP, `X-Frame-Options: DENY`, `nosniff`, `no-referrer`, HSTS present.
+- `POST /recommend` with `http://169.254.169.254/entry/5` → 400 with the generic message.
+- A 6,000-byte body → 413. A valid request → 200, response gzip-encoded.
+- 140 parallel `GET /health` in 8 s, each with a different spoofed `X-Forwarded-For` → 120 × 200
+  then 20 × 429: the limit keys on the address Google's front end adds, not on the spoofed one.
+
 ### Accepted risks
 
 - **Debian base-image CVEs (F-03):** no fixed packages exist yet; the deploy gate blocks any
