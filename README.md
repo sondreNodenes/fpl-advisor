@@ -22,6 +22,33 @@ make test
 make lint
 ```
 
+## Use from Claude (MCP server)
+
+`fpl_advisor/mcp_server.py` exposes four tools over stdio: `get_team(team)`,
+`predict_player(name)`, `recommend_transfers(team)` and `captain_options(team)`.
+It needs local data and a model first (`python -m fpl_advisor.ingest && python -m fpl_advisor.model`).
+
+Claude Code:
+
+```bash
+claude mcp add fpl-advisor -- uv run --directory /path/to/fpl-advisor python -m fpl_advisor.mcp_server
+```
+
+Claude Desktop (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "fpl-advisor": {
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/fpl-advisor", "python", "-m", "fpl_advisor.mcp_server"]
+    }
+  }
+}
+```
+
+Then ask, for example, "Who should team 5767275 captain this week?".
+
 ## Deploy
 
 _TBD (Phase 6)._

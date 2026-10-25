@@ -25,3 +25,4 @@ One line per decision: decision — reason.
 - Free hit week: advise on the previous gameweek's squad and bank — the free hit squad reverts.
 - Added `GET /predictions` (top players by position) — the page needs "predicted points for every player" without returning ~670 rows on every `/recommend`.
 - Kept `httpx` for FastAPI's TestClient and silenced Starlette's deprecation warning — the suggested replacement package was not verified, so not installed.
+- MCP server uses `mcp` 2.x `MCPServer` (FastMCP was renamed in 2.x) over stdio — what Claude Desktop and Claude Code launch locally.

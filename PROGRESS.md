@@ -6,9 +6,9 @@
 - Phase 2: `features.py` (per-fixture, leakage-safe), `model.py` (HistGB), `evaluate.py` → RESULTS.md.
 - Phase 3: `optimize.py` Pyomo/HiGHS MILP for 0–2 transfers, XI, captain.
 - Phase 4: `advisor.py` service, FastAPI `app.py` + static page, `cli.py`.
+- Phase 5: `mcp_server.py` with 4 tools, README setup docs.
 
 ## Next
-- Phase 5: MCP server.
 - Phase 6: Terraform + deploy workflow.
 - Phase 7: README polish, CV_BULLETS.md.
 
