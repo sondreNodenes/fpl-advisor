@@ -17,6 +17,8 @@ from urllib3.util.retry import Retry
 BASE_URL = "https://fantasy.premierleague.com/api/"
 USER_AGENT = "fpl-advisor/0.1 (+https://github.com/sondreNodenes/fpl-advisor)"
 DEFAULT_CACHE_DIR = Path("data/cache")
+MAX_RESPONSE_BYTES = 20 * 1024 * 1024  # bootstrap-static is ~2 MB; anything far larger is wrong
+_SAFE_PATH = re.compile(r"[a-z0-9_-]+(?:/[a-z0-9_-]+)*/")
 
 POSITIONS = {1: "GK", 2: "DEF", 3: "MID", 4: "FWD"}
 
@@ -69,25 +71,72 @@ class NotFoundError(FPLAPIError):
     """The requested resource (usually a team) does not exist or is not public."""
 
 
-def parse_team_id(team: str | int) -> int:
-    """Accept a raw team ID or any URL containing ``/entry/{id}``."""
+LAST_GAMEWEEK = 38
+MAX_TEAM_ID = 99_999_999  # real IDs are around 1e7; the bound keeps junk out of upstream calls
+MAX_INPUT_LENGTH = 200
+_TEAM_ID = re.compile(r"[0-9]{1,8}")
+# The only URLs accepted: fantasy.premierleague.com[/xx]/entry/{id}[/event/{gw}|/history|...]
+_TEAM_URL = re.compile(
+    r"(?:https?://)?(?:www\.)?fantasy\.premierleague\.com(?:/[a-z]{2})?"
+    r"/entry/(?P<id>[0-9]{1,8})(?:/event/(?P<gw>[0-9]{1,2})|/history|/transfers)?/?",
+    re.IGNORECASE,
+)
+_INVALID_TEAM = "Enter an FPL team ID (digits only) or a fantasy.premierleague.com/entry/{id} URL"
+
+
+def parse_team(team: str | int) -> tuple[int, int | None]:
+    """Validate a team ID or FPL URL; return ``(team_id, gameweek or None)``.
+
+    Only ASCII digits and the exact FPL URL pattern are accepted. The input is never
+    fetched: the ID is extracted and requests always go to ``BASE_URL``.
+    """
+    if isinstance(team, bool) or not isinstance(team, int | str):
+        raise ValueError(_INVALID_TEAM)
+    gameweek = None
     if isinstance(team, int):
-        return team
-    text = team.strip()
-    if text.isdigit():
-        return int(text)
-    match = re.search(r"/entry/(\d+)", text)
-    if not match:
-        raise ValueError(f"Could not find an FPL team ID in {team!r}")
-    return int(match.group(1))
+        team_id = team
+    else:
+        text = team.strip()
+        if len(text) > MAX_INPUT_LENGTH:
+            raise ValueError(_INVALID_TEAM)
+        if _TEAM_ID.fullmatch(text):
+            team_id = int(text)
+        elif match := _TEAM_URL.fullmatch(text):
+            team_id = int(match["id"])
+            gameweek = int(match["gw"]) if match["gw"] else None
+        else:
+            raise ValueError(_INVALID_TEAM)
+    if not 1 <= team_id <= MAX_TEAM_ID:
+        raise ValueError(_INVALID_TEAM)
+    if gameweek is not None and not 1 <= gameweek <= LAST_GAMEWEEK:
+        raise ValueError(f"Gameweek must be between 1 and {LAST_GAMEWEEK}")
+    return team_id, gameweek
+
+
+def parse_team_id(team: str | int) -> int:
+    """The team ID from a raw ID or an FPL URL (see ``parse_team``)."""
+    return parse_team(team)[0]
 
 
 def parse_gameweek_from_url(team: str | int) -> int | None:
-    """Return the gameweek from a ``/event/{gw}`` URL, if present."""
-    if isinstance(team, int):
-        return None
-    match = re.search(r"/event/(\d+)", team)
-    return int(match.group(1)) if match else None
+    """The gameweek from an FPL ``/event/{gw}`` URL, if present."""
+    return parse_team(team)[1]
+
+
+def read_limited(response: requests.Response, limit: int) -> bytes:
+    """The response body, or FPLAPIError once it grows past ``limit`` bytes."""
+    declared = response.headers.get("Content-Length")
+    if declared and declared.isdigit() and int(declared) > limit:
+        raise FPLAPIError(f"FPL API response too large ({declared} bytes)")
+    body = bytearray()
+    try:
+        for chunk in response.iter_content(chunk_size=64 * 1024):
+            body += chunk
+            if len(body) > limit:
+                raise FPLAPIError(f"FPL API response larger than {limit} bytes")
+    except requests.RequestException as exc:
+        raise FPLAPIError(f"FPL API connection failed while reading: {exc}") from exc
+    return bytes(body)
 
 
 class FPLClient:
@@ -99,7 +148,7 @@ class FPLClient:
         ttl_seconds: float = 3600,
         min_interval: float = 1.0,
         session: requests.Session | None = None,
-        timeout: float = 20,
+        timeout: tuple[float, float] = (5, 20),  # connect, read
     ) -> None:
         self.cache_dir = Path(cache_dir)
         self.ttl_seconds = ttl_seconds
@@ -125,7 +174,13 @@ class FPLClient:
         return self.cache_dir / (path.strip("/").replace("/", "_") + ".json")
 
     def get(self, path: str, ttl_seconds: float | None = None) -> Any:
-        """GET ``BASE_URL + path`` as JSON, served from cache when fresh."""
+        """GET ``BASE_URL + path`` as JSON, served from cache when fresh.
+
+        Only relative API paths are allowed, redirects are not followed (a redirect could
+        point at another host) and bodies over ``MAX_RESPONSE_BYTES`` are rejected.
+        """
+        if not _SAFE_PATH.fullmatch(path):
+            raise ValueError(f"Unexpected FPL API path: {path!r}")
         ttl = self.ttl_seconds if ttl_seconds is None else ttl_seconds
         cache_file = self._cache_path(path)
         if cache_file.exists() and time.time() - cache_file.stat().st_mtime < ttl:
@@ -135,18 +190,24 @@ class FPLClient:
         if wait > 0:
             time.sleep(wait)
         try:
-            response = self.session.get(BASE_URL + path, timeout=self.timeout)
+            response = self.session.get(
+                BASE_URL + path, timeout=self.timeout, allow_redirects=False, stream=True
+            )
         except requests.RequestException as exc:
             raise FPLAPIError(f"FPL API unavailable ({path}): {exc}") from exc
         finally:
             self._last_request = time.monotonic()
 
-        if response.status_code == 404:
-            raise NotFoundError(f"Not found: {path}")
-        if response.status_code != 200:
-            raise FPLAPIError(f"FPL API returned HTTP {response.status_code} for {path}")
         try:
-            data = response.json()
+            if response.status_code == 404:
+                raise NotFoundError(f"Not found: {path}")
+            if response.status_code != 200:
+                raise FPLAPIError(f"FPL API returned HTTP {response.status_code} for {path}")
+            body = read_limited(response, MAX_RESPONSE_BYTES)
+        finally:
+            response.close()
+        try:
+            data = json.loads(body)
         except ValueError as exc:
             # During gameweek updates the API serves an HTML maintenance page.
             raise FPLAPIError(f"FPL API returned non-JSON for {path} (being updated?)") from exc

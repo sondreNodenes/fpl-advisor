@@ -33,7 +33,8 @@ def test_parse_team_id_rejects_garbage() -> None:
 
 
 def test_parse_gameweek_from_url() -> None:
-    assert api.parse_gameweek_from_url("https://x/en/entry/5767275/event/8") == 8
+    url = "https://fantasy.premierleague.com/en/entry/5767275/event/8"
+    assert api.parse_gameweek_from_url(url) == 8
     assert api.parse_gameweek_from_url("5767275") is None
 
 
@@ -84,24 +85,28 @@ def test_free_transfers_rolls_over_and_respects_wildcard() -> None:
 
 
 class FakeResponse:
-    def __init__(self, status: int, payload=None, text: bool = False) -> None:
+    def __init__(self, status: int, payload=None, text: bool = False, headers=None) -> None:
         self.status_code = status
-        self._payload = payload
-        self._text = text
+        self.headers = headers or {}
+        self.body = b"<html>maintenance</html>" if text else json.dumps(payload).encode()
 
-    def json(self):
-        if self._text:
-            raise ValueError("not json")
-        return self._payload
+    def iter_content(self, chunk_size):
+        for i in range(0, len(self.body), chunk_size):
+            yield self.body[i : i + chunk_size]
+
+    def close(self) -> None:
+        pass
 
 
 class FakeSession:
     def __init__(self, responses) -> None:
         self.responses = list(responses)
         self.calls = 0
+        self.kwargs: list[dict] = []
 
-    def get(self, url, timeout):
+    def get(self, url, **kwargs):
         self.calls += 1
+        self.kwargs.append(kwargs)
         item = self.responses.pop(0)
         if isinstance(item, Exception):
             raise item

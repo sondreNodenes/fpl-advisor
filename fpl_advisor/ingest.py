@@ -23,6 +23,7 @@ SNAPSHOT_FILES = ("players", "history", "fixtures", "teams")
 DONE_MARKER = "_SUCCESS"  # written last; readers ignore folders without it
 CACHE_DIR = Path(os.environ.get("FPL_CACHE_DIR", DATA_DIR / "cache"))
 # MIT-licensed community dataset (github.com/vaastav/Fantasy-Premier-League).
+MAX_PAST_SEASON_BYTES = 100 * 1024 * 1024  # merged_gw.csv is ~10 MB per season
 PAST_SEASON_URL = "https://raw.githubusercontent.com/vaastav/Fantasy-Premier-League/master/data/{season}/gws/merged_gw.csv"
 DEFAULT_PAST_SEASONS = ("2022-23", "2023-24", "2024-25", "2025-26")
 _POSITION_CODES = {"GK": 1, "GKP": 1, "DEF": 2, "MID": 3, "FWD": 4}
@@ -124,16 +125,19 @@ def download_past_seasons(seasons: list[str], data_dir: Path, force: bool = Fals
         if path.exists() and not force:
             paths.append(path)
             continue
-        response = requests.get(
+        with requests.get(
             PAST_SEASON_URL.format(season=season),
             headers={"User-Agent": api.USER_AGENT},
-            timeout=60,
-        )
-        if response.status_code != 200:
-            log.warning("Past season %s unavailable (HTTP %d)", season, response.status_code)
-            continue
+            timeout=(5, 60),
+            allow_redirects=False,  # fixed host only
+            stream=True,
+        ) as response:
+            if response.status_code != 200:
+                log.warning("Past season %s unavailable (HTTP %d)", season, response.status_code)
+                continue
+            body = api.read_limited(response, MAX_PAST_SEASON_BYTES)
         path.parent.mkdir(parents=True, exist_ok=True)
-        parse_past_season(response.text, season).to_parquet(path, index=False)
+        parse_past_season(body.decode("utf-8"), season).to_parquet(path, index=False)
         log.info("Wrote %s", path)
         paths.append(path)
     return paths

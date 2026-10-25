@@ -26,6 +26,8 @@ locals {
     FPL_DATA_DIR   = "/data"
     FPL_MODEL_PATH = "/data/models/model.joblib"
     FPL_CACHE_DIR  = "/tmp/fpl-cache"
+    # Rate limits key on the client IP that Google's front end appends to X-Forwarded-For.
+    FPL_TRUST_PROXY_HEADERS = "1"
   }
 }
 

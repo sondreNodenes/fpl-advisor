@@ -72,7 +72,7 @@ class Advisor:
         bootstrap = self.client.bootstrap()
         state = api.gameweek_state(bootstrap)
         start = start or state.next or state.current
-        if start is None:
+        if start is None or start > api.LAST_GAMEWEEK:
             raise ValueError("Season is over: no upcoming gameweek")
         gameweeks = list(range(start, min(start + HORIZON, 39)))
         snap = self.snapshot()
@@ -104,10 +104,10 @@ class Advisor:
 
     def advise(self, team: str | int, gameweek: int | None = None) -> Advice:
         """Recommendations for the squad held after ``gameweek`` (default: current)."""
-        team_id = api.parse_team_id(team)
+        team_id, url_gameweek = api.parse_team(team)
         bootstrap = self.client.bootstrap()
         state = api.gameweek_state(bootstrap)
-        picks_gw = gameweek or api.parse_gameweek_from_url(team) or state.current
+        picks_gw = gameweek or url_gameweek or state.current
         if picks_gw is None:
             raise ValueError("The season has not started yet: no squad to advise on")
 

@@ -2,24 +2,53 @@
 
 from __future__ import annotations
 
+import os
+import time
 from dataclasses import asdict
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from fpl_advisor import __version__, api
+from fpl_advisor import __version__, api, security
 from fpl_advisor.advisor import Advisor, PlayerView
 
 STATIC = Path(__file__).parent / "static"
+MAX_BODY_BYTES = 4 * 1024  # a team URL and a gameweek fit easily
+WORK_SLOTS = int(os.environ.get("FPL_WORK_SLOTS", "2"))  # concurrent optimizations per instance
+WORK_QUEUE_SECONDS = 10.0
+WORK_TIMEOUT_SECONDS = 60.0  # below Cloud Run's 120 s request timeout
+# Behind Cloud Run, client IPs come from X-Forwarded-For (set by Google's front end).
+TRUST_PROXY = os.environ.get("FPL_TRUST_PROXY_HEADERS") == "1"
 
+RATE_LIMITS = {  # per client IP per minute
+    ("POST", "/recommend"): security.RateLimiter(limit=10, window=60),
+    ("GET", "/predictions"): security.RateLimiter(limit=60, window=60),
+}
+
+log = security.json_logger("fpl_advisor.app")
 app = FastAPI(title="FPL Advisor", version=__version__)
+app.add_middleware(
+    security.AbuseControlMiddleware,
+    limits=RATE_LIMITS,
+    max_body_bytes=MAX_BODY_BYTES,
+    trust_proxy=TRUST_PROXY,
+    logger=log,
+)
+app.add_middleware(security.SecurityHeadersMiddleware)  # outermost: also covers 413/429
+app.mount("/static", StaticFiles(directory=STATIC), name="static")
 advisor = Advisor()
+work = security.WorkLimiter(WORK_SLOTS, WORK_QUEUE_SECONDS, WORK_TIMEOUT_SECONDS)
 
 
 class RecommendRequest(BaseModel):
-    team: str = Field(..., description="FPL team ID or any URL containing /entry/{id}")
+    team: str = Field(
+        ...,
+        max_length=api.MAX_INPUT_LENGTH,
+        description="FPL team ID or a fantasy.premierleague.com/entry/{id} URL",
+    )
     gameweek: int | None = Field(None, ge=1, le=38, description="Squad gameweek (default: current)")
 
 
@@ -127,16 +156,56 @@ class PredictionsResponse(BaseModel):
     players: list[Player]
 
 
+EXPECTED_ERRORS = (ValueError, api.FPLAPIError, FileNotFoundError, security.Busy, TimeoutError)
+
+
 def _errors(exc: Exception) -> HTTPException:
-    if isinstance(exc, ValueError):
+    """Map expected failures to clear messages. Texts shown to clients are written here or
+    in our own validation code; upstream and file system details stay in the logs."""
+    if isinstance(exc, ValueError):  # our validation messages, no raw input echoed
         return HTTPException(400, str(exc))
     if isinstance(exc, api.NotFoundError):
         return HTTPException(404, str(exc))
     if isinstance(exc, api.FPLAPIError):
-        return HTTPException(503, f"FPL API unavailable, try again shortly ({exc})")
+        return HTTPException(503, "The FPL API is unavailable right now; try again shortly")
     if isinstance(exc, FileNotFoundError):
-        return HTTPException(503, f"Model or data not ready: {exc}")
+        return HTTPException(503, "Predictions are not ready yet; try again later")
+    if isinstance(exc, security.Busy):
+        return HTTPException(503, "Busy, try again in a few seconds", {"Retry-After": "5"})
+    if isinstance(exc, TimeoutError):
+        return HTTPException(504, "The request took too long; try again shortly")
     raise exc
+
+
+async def _run(event: str, fn, **fields):
+    """Run CPU-heavy work in the limited pool; log one structured line per request."""
+    started = time.monotonic()
+    try:
+        result = await work.run(fn)
+    except EXPECTED_ERRORS as exc:
+        error = _errors(exc)
+        log.warning(
+            event,
+            extra={
+                "fields": fields
+                | {"status": error.status_code, "error": type(exc).__name__}
+                | _elapsed(started)
+            },
+        )
+        raise error from exc
+    log.info(event, extra={"fields": fields | {"status": 200} | _elapsed(started)})
+    return result
+
+
+def _elapsed(started: float) -> dict[str, int]:
+    return {"duration_ms": round((time.monotonic() - started) * 1000)}
+
+
+@app.exception_handler(Exception)
+async def unexpected_error(request: Request, exc: Exception) -> JSONResponse:
+    """Never send a stack trace to the client; log it for us instead."""
+    log.error("unhandled error", exc_info=exc, extra={"fields": {"path": request.url.path}})
+    return JSONResponse({"detail": "Internal error"}, status_code=500)
 
 
 @app.get("/health")
@@ -145,24 +214,27 @@ def health() -> dict[str, str]:
 
 
 @app.post("/recommend", response_model=RecommendResponse)
-def recommend(req: RecommendRequest) -> RecommendResponse:
+async def recommend(req: RecommendRequest) -> RecommendResponse:
     try:
-        advice = advisor.advise(req.team, req.gameweek)
-    except (ValueError, api.FPLAPIError, FileNotFoundError) as exc:
+        team_id, _ = api.parse_team(req.team)  # validate before any work or logging
+    except ValueError as exc:
         raise _errors(exc) from exc
+    advice = await _run(
+        "recommend",
+        lambda: advisor.advise(req.team, req.gameweek),
+        team_id=team_id,
+        gameweek=req.gameweek,
+    )
     return RecommendResponse(**asdict(advice))
 
 
 @app.get("/predictions", response_model=PredictionsResponse)
-def predictions(
+async def predictions(
     position: str | None = Query(None, pattern="^(GK|DEF|MID|FWD)$"),
     limit: int = Query(50, ge=1, le=1000),
     sort: str = Query("next", pattern="^(next|horizon)$"),
 ) -> PredictionsResponse:
-    try:
-        gameweeks, preds = advisor.forecast()
-    except (ValueError, api.FPLAPIError, FileNotFoundError) as exc:
-        raise _errors(exc) from exc
+    gameweeks, preds = await _run("predictions", advisor.forecast, position=position)
     by = "horizon_points" if sort == "horizon" else "predicted_points"
     players = PlayerView(preds, gameweeks).ranked(position, limit, by)
     return PredictionsResponse(gameweek=gameweeks[0], gameweeks=gameweeks, players=players)

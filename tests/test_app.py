@@ -8,7 +8,9 @@ from fpl_advisor import app as app_module
 @pytest.fixture
 def client(fake_advisor, monkeypatch) -> TestClient:
     monkeypatch.setattr(app_module, "advisor", fake_advisor)
-    return TestClient(app_module.app)
+    for limiter in app_module.RATE_LIMITS.values():
+        limiter.reset()
+    return TestClient(app_module.app, raise_server_exceptions=False)
 
 
 def test_health(client) -> None:
