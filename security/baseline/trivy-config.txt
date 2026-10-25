@@ -1,0 +1,126 @@
+
+Dockerfile (dockerfile)
+=======================
+Tests: 1 (SUCCESSES: 0, FAILURES: 1)
+Failures: 1 (UNKNOWN: 0, LOW: 1, MEDIUM: 0, HIGH: 0, CRITICAL: 0)
+
+DS-0026 (LOW): Add HEALTHCHECK instruction in your Dockerfile
+════════════════════════════════════════
+You should add HEALTHCHECK instruction in your docker container images to perform the health check on running containers.
+
+See https://avd.aquasec.com/misconfig/ds-0026
+────────────────────────────────────────
+
+
+
+infra/bootstrap/main.tf (terraform)
+===================================
+Tests: 2 (SUCCESSES: 0, FAILURES: 2)
+Failures: 2 (UNKNOWN: 0, LOW: 1, MEDIUM: 1, HIGH: 0, CRITICAL: 0)
+
+GCP-0066 (LOW): Storage bucket encryption does not use a customer-managed key.
+════════════════════════════════════════
+Using unmanaged keys makes rotation and general management difficult.
+
+
+See https://avd.aquasec.com/misconfig/gcp-0066
+────────────────────────────────────────
+ infra/bootstrap/main.tf:71-78
+────────────────────────────────────────
+  71 ┌ resource "google_storage_bucket" "data" {
+  72 │   name                        = "${var.project_id}-fpl-data"
+  73 │   location                    = var.region
+  74 │   uniform_bucket_level_access = true
+  75 │   public_access_prevention    = "enforced"
+  76 │   force_destroy               = true # data is re-creatable by running the job
+  77 │   depends_on                  = [google_project_service.apis]
+  78 └ }
+────────────────────────────────────────
+
+
+GCP-0078 (MEDIUM): Storage bucket versioning is not enabled.
+════════════════════════════════════════
+Object versioning in Cloud Storage is recommended to protect against accidental or malicious deletions.
+
+
+See https://avd.aquasec.com/misconfig/gcp-0078
+────────────────────────────────────────
+ infra/bootstrap/main.tf:71-78
+────────────────────────────────────────
+  71 ┌ resource "google_storage_bucket" "data" {
+  72 │   name                        = "${var.project_id}-fpl-data"
+  73 │   location                    = var.region
+  74 │   uniform_bucket_level_access = true
+  75 │   public_access_prevention    = "enforced"
+  76 │   force_destroy               = true # data is re-creatable by running the job
+  77 │   depends_on                  = [google_project_service.apis]
+  78 └ }
+────────────────────────────────────────
+
+
+
+main.tf (terraformplan-snapshot)
+================================
+Tests: 3 (SUCCESSES: 0, FAILURES: 3)
+Failures: 3 (UNKNOWN: 0, LOW: 1, MEDIUM: 2, HIGH: 0, CRITICAL: 0)
+
+GCP-0066 (LOW): Storage bucket encryption does not use a customer-managed key.
+════════════════════════════════════════
+Using unmanaged keys makes rotation and general management difficult.
+
+
+See https://avd.aquasec.com/misconfig/gcp-0066
+────────────────────────────────────────
+ main.tf:71-78
+────────────────────────────────────────
+  71 ┌ resource "google_storage_bucket" "data" {
+  72 │   name                        = "${var.project_id}-fpl-data"
+  73 │   location                    = var.region
+  74 │   uniform_bucket_level_access = true
+  75 │   public_access_prevention    = "enforced"
+  76 │   force_destroy               = true # data is re-creatable by running the job
+  77 │   depends_on                  = [google_project_service.apis]
+  78 └ }
+────────────────────────────────────────
+
+
+GCP-0077 (MEDIUM): Storage bucket logging is not configured with a target log bucket.
+════════════════════════════════════════
+Cloud Storage bucket access logs should be enabled for audit purposes.
+
+
+See https://avd.aquasec.com/misconfig/gcp-0077
+────────────────────────────────────────
+ main.tf:71-78
+────────────────────────────────────────
+  71 ┌ resource "google_storage_bucket" "data" {
+  72 │   name                        = "${var.project_id}-fpl-data"
+  73 │   location                    = var.region
+  74 │   uniform_bucket_level_access = true
+  75 │   public_access_prevention    = "enforced"
+  76 │   force_destroy               = true # data is re-creatable by running the job
+  77 │   depends_on                  = [google_project_service.apis]
+  78 └ }
+────────────────────────────────────────
+
+
+GCP-0078 (MEDIUM): Storage bucket versioning is not enabled.
+════════════════════════════════════════
+Object versioning in Cloud Storage is recommended to protect against accidental or malicious deletions.
+
+
+See https://avd.aquasec.com/misconfig/gcp-0078
+────────────────────────────────────────
+ main.tf:71-78
+────────────────────────────────────────
+  71 ┌ resource "google_storage_bucket" "data" {
+  72 │   name                        = "${var.project_id}-fpl-data"
+  73 │   location                    = var.region
+  74 │   uniform_bucket_level_access = true
+  75 │   public_access_prevention    = "enforced"
+  76 │   force_destroy               = true # data is re-creatable by running the job
+  77 │   depends_on                  = [google_project_service.apis]
+  78 └ }
+────────────────────────────────────────
+
+

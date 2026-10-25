@@ -1,0 +1,40 @@
+{
+  "gitleaks (secrets)": {
+    "findings": 0
+  },
+  "pip-audit (runtime)": {
+    "vulnerabilities": 0
+  },
+  "pip-audit (dev)": {
+    "vulnerabilities": 0
+  },
+  "ruff S (bandit)": {
+    "S101": 153,
+    "S607": 1
+  },
+  "trivy image: debian (fpl-advisor:scan (debian 13.7))": {
+    "HIGH": 44,
+    "MEDIUM": 58,
+    "LOW": 61,
+    "UNKNOWN": 1,
+    "total": 164,
+    "fixable": 0
+  },
+  "trivy image: python-pkg (Python)": {
+    "MEDIUM": 5,
+    "LOW": 1,
+    "total": 6,
+    "fixable": 6
+  },
+  "trivy image: rustbinary (usr/bin/uv)": {
+    "HIGH": 2,
+    "MEDIUM": 10,
+    "LOW": 5,
+    "total": 17,
+    "fixable": 17
+  },
+  "trivy config (IaC, Dockerfile)": {
+    "MEDIUM": 2,
+    "LOW": 2
+  }
+}

@@ -10,6 +10,7 @@ at least one earlier gameweek this season, so every method is scored on the same
 from __future__ import annotations
 
 import argparse
+import shutil
 import subprocess
 from datetime import date
 from pathlib import Path
@@ -175,9 +176,15 @@ def community_xp_check(gw: pd.DataFrame) -> list[str]:
 
 
 def write_results(evals: list[dict], path: Path) -> str:
-    commit = subprocess.run(
-        ["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True
-    ).stdout.strip()
+    # Absolute path to git and a fixed argument list with no shell and no user input.
+    git = shutil.which("git")
+    commit = (
+        subprocess.run(  # noqa: S603
+            [git, "rev-parse", "--short", "HEAD"], capture_output=True, text=True
+        ).stdout.strip()
+        if git
+        else "unknown"
+    )
     lines = [
         "# Results",
         "",

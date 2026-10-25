@@ -12,3 +12,5 @@ dist/
 *.tfstate.*
 .DS_Store
 tfplan
+/security/latest/
+/security/latest/

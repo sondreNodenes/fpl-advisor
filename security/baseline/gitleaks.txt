@@ -1,0 +1,26 @@
+Unable to find image 'ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f' locally
+ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f: Pulling from gitleaks/gitleaks
+4c3e14845bb7: Pulling fs layer
+d741ee1608f3: Pulling fs layer
+e2bec8d3df2d: Pulling fs layer
+fe5506365b94: Pulling fs layer
+4c3e14845bb7: Download complete
+fe5506365b94: Download complete
+e2bec8d3df2d: Download complete
+d741ee1608f3: Download complete
+d741ee1608f3: Pull complete
+e2bec8d3df2d: Pull complete
+4c3e14845bb7: Pull complete
+fe5506365b94: Pull complete
+Digest: sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+Status: Downloaded newer image for ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+
+    ○
+    │╲
+    │ ○
+    ○ ░
+    ░    gitleaks
+
+[90m10:26AM[0m [32mINF[0m [1m18 commits scanned.[0m
+[90m10:26AM[0m [32mINF[0m [1mscanned ~369142 bytes (369.14 KB) in 479ms[0m
+[90m10:26AM[0m [32mINF[0m [1mno leaks found[0m

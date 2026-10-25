@@ -1,4 +1,4 @@
-.PHONY: install test lint format run ingest train evaluate tf-check bootstrap run-job destroy
+.PHONY: install test lint format run ingest train evaluate tf-check security bootstrap run-job destroy
 
 PROJECT_ID ?= $(shell gcloud config get-value project 2>/dev/null)
 REGION ?= europe-north1
@@ -35,6 +35,14 @@ tf-check:
 	for root in infra/bootstrap infra/app; do \
 		terraform -chdir=$$root init -backend=false -input=false >/dev/null && terraform -chdir=$$root validate; \
 	done
+
+# All security scans (secrets, CVEs, bandit rules, image, IaC); reports in security/latest.
+security:
+	security/scan.sh security/latest
+
+# All security scans (secrets, CVEs, bandit rules, image, IaC); reports in security/latest.
+security:
+	security/scan.sh security/latest
 
 # One-time: state bucket + foundation (see README "Deploy").
 bootstrap:

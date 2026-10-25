@@ -1,0 +1,94 @@
+
+Report Summary
+
+┌─────────────────────────┬────────────────────────┬───────────────────┐
+│         Target          │          Type          │ Misconfigurations │
+├─────────────────────────┼────────────────────────┼───────────────────┤
+│ .                       │ terraformplan-snapshot │         0         │
+├─────────────────────────┼────────────────────────┼───────────────────┤
+│ Dockerfile              │       dockerfile       │         0         │
+├─────────────────────────┼────────────────────────┼───────────────────┤
+│ infra/app               │       terraform        │         0         │
+├─────────────────────────┼────────────────────────┼───────────────────┤
+│ infra/bootstrap         │       terraform        │         0         │
+├─────────────────────────┼────────────────────────┼───────────────────┤
+│ infra/bootstrap/main.tf │       terraform        │         1         │
+├─────────────────────────┼────────────────────────┼───────────────────┤
+│ main.tf                 │ terraformplan-snapshot │         2         │
+└─────────────────────────┴────────────────────────┴───────────────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+
+
+infra/bootstrap/main.tf (terraform)
+===================================
+Tests: 1 (SUCCESSES: 0, FAILURES: 1)
+Failures: 1 (MEDIUM: 1, HIGH: 0, CRITICAL: 0)
+
+GCP-0078 (MEDIUM): Storage bucket versioning is not enabled.
+════════════════════════════════════════
+Object versioning in Cloud Storage is recommended to protect against accidental or malicious deletions.
+
+
+See https://avd.aquasec.com/misconfig/gcp-0078
+────────────────────────────────────────
+ infra/bootstrap/main.tf:71-78
+────────────────────────────────────────
+  71 ┌ resource "google_storage_bucket" "data" {
+  72 │   name                        = "${var.project_id}-fpl-data"
+  73 │   location                    = var.region
+  74 │   uniform_bucket_level_access = true
+  75 │   public_access_prevention    = "enforced"
+  76 │   force_destroy               = true # data is re-creatable by running the job
+  77 │   depends_on                  = [google_project_service.apis]
+  78 └ }
+────────────────────────────────────────
+
+
+
+main.tf (terraformplan-snapshot)
+================================
+Tests: 2 (SUCCESSES: 0, FAILURES: 2)
+Failures: 2 (MEDIUM: 2, HIGH: 0, CRITICAL: 0)
+
+GCP-0077 (MEDIUM): Storage bucket logging is not configured with a target log bucket.
+════════════════════════════════════════
+Cloud Storage bucket access logs should be enabled for audit purposes.
+
+
+See https://avd.aquasec.com/misconfig/gcp-0077
+────────────────────────────────────────
+ main.tf:71-78
+────────────────────────────────────────
+  71 ┌ resource "google_storage_bucket" "data" {
+  72 │   name                        = "${var.project_id}-fpl-data"
+  73 │   location                    = var.region
+  74 │   uniform_bucket_level_access = true
+  75 │   public_access_prevention    = "enforced"
+  76 │   force_destroy               = true # data is re-creatable by running the job
+  77 │   depends_on                  = [google_project_service.apis]
+  78 └ }
+────────────────────────────────────────
+
+
+GCP-0078 (MEDIUM): Storage bucket versioning is not enabled.
+════════════════════════════════════════
+Object versioning in Cloud Storage is recommended to protect against accidental or malicious deletions.
+
+
+See https://avd.aquasec.com/misconfig/gcp-0078
+────────────────────────────────────────
+ main.tf:71-78
+────────────────────────────────────────
+  71 ┌ resource "google_storage_bucket" "data" {
+  72 │   name                        = "${var.project_id}-fpl-data"
+  73 │   location                    = var.region
+  74 │   uniform_bucket_level_access = true
+  75 │   public_access_prevention    = "enforced"
+  76 │   force_destroy               = true # data is re-creatable by running the job
+  77 │   depends_on                  = [google_project_service.apis]
+  78 └ }
+────────────────────────────────────────
+
+

@@ -41,3 +41,6 @@ One line per decision: decision — reason.
 - Chip windows and counts read from bootstrap `chips` (two of each per season since 2025-26), usage from entry history.
 - Optimizer drops dominated players (same position, no cheaper and no better in every week, by a margin of 5 over the position count) before solving — about 3x faster with the same optimum on the test team and a test against unpruned solves.
 - No `prompt_0_fpl_stable.md` exists in the repo; the security pass starts from the deployed state in PROGRESS.md (commit 2d0c06b) and the brief is summarised in `SECURITY_BRIEF.md`.
+- Security scans run from one script (`security/scan.sh`) used by both `make security` and CI, with Gitleaks and Trivy as Docker images pinned by digest and pip-audit pinned through `uvx` — same tools and versions locally and in CI, nothing added to `pyproject.toml`.
+- Trivy image gate: fixable HIGH/CRITICAL only (`--ignore-unfixed`) — Debian publishes CVEs it will not or cannot fix yet; failing on those would make the gate permanently red without any action available. The full report (all severities) is still saved.
+- Ruff `S` rules on for all code; `S101` ignored in `tests/**` only (pytest asserts).

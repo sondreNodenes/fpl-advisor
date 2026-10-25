@@ -1,0 +1,266 @@
+
+Report Summary
+
+┌──────────────────────────────────────────────────────────────────────────────────┬────────────┬─────────────────┐
+│                                      Target                                      │    Type    │ Vulnerabilities │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ fpl-advisor:scan (debian 13.7)                                                   │   debian   │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/annotated_doc-0.0.5.dist-info/METADATA    │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/annotated_types-0.8.0.dist-info/METADATA  │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/anyio-4.15.1.dist-info/METADATA           │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/attrs-26.1.0.dist-info/METADATA           │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/certifi-2026.10.23.dist-info/METADATA     │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/cffi-2.1.1.dist-info/METADATA             │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/charset_normalizer-3.5.2.dist-info/METAD- │ python-pkg │        0        │
+│ ATA                                                                              │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/click-8.5.0.dist-info/METADATA            │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/cloudpickle-3.1.2.dist-info/METADATA      │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/cryptography-50.0.2.dist-info/METADATA    │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/fastapi-0.162.0.dist-info/METADATA        │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/fpl_advisor-0.1.0.dist-info/METADATA      │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/h11-0.16.0.dist-info/METADATA             │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/highspy-1.15.1.dist-info/METADATA         │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/httpcore2-2.16.0.dist-info/METADATA       │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/httpx2-2.16.0.dist-info/METADATA          │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/idna-3.20.dist-info/METADATA              │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/joblib-1.6.0.dist-info/METADATA           │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/jsonschema-4.26.0.dist-info/METADATA      │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/jsonschema_specifications-2025.9.1.dist-- │ python-pkg │        0        │
+│ info/METADATA                                                                    │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/mcp-2.3.0.dist-info/METADATA              │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/mcp_types-2.3.0.dist-info/METADATA        │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/narwhals-2.27.1.dist-info/METADATA        │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/numpy-2.5.4.dist-info/METADATA            │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/opentelemetry_api-1.45.1.dist-info/METAD- │ python-pkg │        0        │
+│ ATA                                                                              │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/pandas-3.1.0.dist-info/METADATA           │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/pyarrow-26.0.0.dist-info/METADATA         │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/pycparser-3.12.dist-info/METADATA         │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/pydantic-2.14.1.dist-info/METADATA        │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/pydantic_core-2.50.1.dist-info/METADATA   │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/pyjwt-2.15.1.dist-info/METADATA           │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/pyomo-6.10.1.dist-info/METADATA           │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/python_dateutil-3.0.0.dist-info/METADATA  │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/python_multipart-0.0.32.dist-info/METADA- │ python-pkg │        0        │
+│ TA                                                                               │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/referencing-0.37.0.dist-info/METADATA     │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/requests-2.34.2.dist-info/METADATA        │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/rpds_py-2026.9.1.dist-info/METADATA       │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/scikit_learn-1.9.1.dist-info/METADATA     │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/scipy-1.18.1.dist-info/METADATA           │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/six-1.17.0.dist-info/METADATA             │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/sse_starlette-3.5.1.dist-info/METADATA    │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/starlette-1.10.0.dist-info/METADATA       │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/threadpoolctl-3.7.0.dist-info/METADATA    │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/truststore-0.10.5.dist-info/METADATA      │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/typing_extensions-4.16.0.dist-info/METAD- │ python-pkg │        0        │
+│ ATA                                                                              │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/typing_inspection-0.4.4.dist-info/METADA- │ python-pkg │        0        │
+│ TA                                                                               │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/tzdata-2026.5.dist-info/METADATA          │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/urllib3-2.8.0.dist-info/METADATA          │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ app/.venv/lib/python3.12/site-packages/uvicorn-0.54.0.dist-info/METADATA         │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/-Iul5IDbmqthR9b4rkW52/urllib3-2.8.0.dist-info/METADATA │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/-fEKRSe3H7OFWbbKmNVIV/truststore-0.10.5.dist-info/MET- │ python-pkg │        0        │
+│ ADATA                                                                            │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/16l4NjG7DcwDvtV02ssol/pydantic-2.14.1.dist-info/METAD- │ python-pkg │        0        │
+│ ATA                                                                              │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/2_7CIXNprHOq0cOJZMxQe/python_multipart-0.0.32.dist-in- │ python-pkg │        0        │
+│ fo/METADATA                                                                      │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/2nhcc1TqaTeoiWzR2B9KW/jsonschema-4.26.0.dist-info/MET- │ python-pkg │        0        │
+│ ADATA                                                                            │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/4_Nc2hSwHJNPFJX5kEBJK/idna-3.20.dist-info/METADATA     │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/4_jxX0_VngpQsgjzVQ_aE/rpds_py-2026.9.1.dist-info/META- │ python-pkg │        0        │
+│ DATA                                                                             │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/60sQWTApZ0_QntSXWuopb/joblib-1.6.0.dist-info/METADATA  │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/6zQN3v2AvQWV_uO8TsGso/pyjwt-2.15.1.dist-info/METADATA  │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/AuV8rrMLeWNdbkuIXXitC/typing_extensions-4.16.0.dist-i- │ python-pkg │        0        │
+│ nfo/METADATA                                                                     │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/BPGJCgXXBR8z9LDW6R0Wj/anyio-4.15.1.dist-info/METADATA  │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/CEvmBorgBGaoY35FX1dLx/fpl_advisor-0.1.0.dist-info/MET- │ python-pkg │        0        │
+│ ADATA                                                                            │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/DCtMzxRe6umvxQO7A-87a/pyomo-6.10.1.dist-info/METADATA  │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/DvBIvznRY_gMAZG6DKDgY/pycparser-3.12.dist-info/METADA- │ python-pkg │        0        │
+│ TA                                                                               │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/FeIRWcWNBk-hRma5eSR7l/pandas-3.1.0.dist-info/METADATA  │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/KEotMQiqEVuOC4I9blLL5/tzdata-2026.5.dist-info/METADATA │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/KHiXOVd-VzJFSZbHHJfPP/annotated_doc-0.0.5.dist-info/M- │ python-pkg │        0        │
+│ ETADATA                                                                          │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/NkGscxnAoiXf5Sbw9Qp9_/click-8.5.0.dist-info/METADATA   │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/OKFHOHKRSvkQRJ9Y1I_0H/cryptography-50.0.2.dist-info/M- │ python-pkg │        0        │
+│ ETADATA                                                                          │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/QILpeWpr1jupufEqXZBT1/fastapi-0.162.0.dist-info/METAD- │ python-pkg │        0        │
+│ ATA                                                                              │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/SDyt3gM948nmX2JmPDA9h/numpy-2.5.4.dist-info/METADATA   │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/UfFzaKitn6PEAkRzRvRxX/mcp-2.3.0.dist-info/METADATA     │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/VrxKa46kuJ6C-HS4Mh3FW/cloudpickle-3.1.2.dist-info/MET- │ python-pkg │        0        │
+│ ADATA                                                                            │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/dYpCWW6q8Iwkdikj66SJY/threadpoolctl-3.7.0.dist-info/M- │ python-pkg │        0        │
+│ ETADATA                                                                          │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/g7oB2XgSE2BNMf0KryR-8/six-1.17.0.dist-info/METADATA    │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/hrvJ7ejxuAfNY9HmdnClC/narwhals-2.27.1.dist-info/METAD- │ python-pkg │        0        │
+│ ATA                                                                              │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/iD1nvZDI87VeMIHAL6FiZ/httpcore2-2.16.0.dist-info/META- │ python-pkg │        0        │
+│ DATA                                                                             │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/ie1k_Lzckwae_Q5Clh7ql/requests-2.34.2.dist-info/METAD- │ python-pkg │        0        │
+│ ATA                                                                              │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/ittMEPpeaCGh-1eg8xCAm/starlette-1.10.0.dist-info/META- │ python-pkg │        0        │
+│ DATA                                                                             │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/jMGT2BQ51RHeORWmmUivE/h11-0.16.0.dist-info/METADATA    │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/kKh1rhtn5cl3Q_Rra1oqH/attrs-26.1.0.dist-info/METADATA  │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/kjLtnkmuOiLjwLM9ys9IQ/charset_normalizer-3.5.2.dist-i- │ python-pkg │        0        │
+│ nfo/METADATA                                                                     │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/kmTbA5L__DbG-8Zx4cmG0/opentelemetry_api-1.45.1.dist-i- │ python-pkg │        0        │
+│ nfo/METADATA                                                                     │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/krYtovgdhZOSaSgysZHSg/scipy-1.18.1.dist-info/METADATA  │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/lrXHLX9JTfxVk6vRsVTcD/jsonschema_specifications-2025.- │ python-pkg │        0        │
+│ 9.1.dist-info/METADATA                                                           │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/msSUBLWVhY7RqnRdvOLUD/certifi-2026.10.23.dist-info/ME- │ python-pkg │        0        │
+│ TADATA                                                                           │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/niTOC-pIJD7Cwc9K3hqur/uvicorn-0.54.0.dist-info/METADA- │ python-pkg │        0        │
+│ TA                                                                               │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/ozKFcBzbd-CEs0NHBinIb/cffi-2.1.1.dist-info/METADATA    │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/qOmMwI3ANy-9Z04uRpFcD/referencing-0.37.0.dist-info/ME- │ python-pkg │        0        │
+│ TADATA                                                                           │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/rWOU858XJXWzqz5m9kCVB/pydantic_core-2.50.1.dist-info/- │ python-pkg │        0        │
+│ METADATA                                                                         │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/rrzn-ZsqkU4h_FhabyuJh/pyarrow-26.0.0.dist-info/METADA- │ python-pkg │        0        │
+│ TA                                                                               │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/tCamOCuwx2y8O-hH_j2rB/typing_inspection-0.4.4.dist-in- │ python-pkg │        0        │
+│ fo/METADATA                                                                      │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/tG5N1qtMsMs9_A3d1T31U/httpx2-2.16.0.dist-info/METADATA │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/tikRx_qpLVE_Li0HnOvZ8/python_dateutil-3.0.0.dist-info- │ python-pkg │        0        │
+│ /METADATA                                                                        │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/uDpxM7Oqo838T_UJSwez_/scikit_learn-1.9.1.dist-info/ME- │ python-pkg │        0        │
+│ TADATA                                                                           │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/uHJ3MyTwvI8Egyk6qD4Z2/annotated_types-0.8.0.dist-info- │ python-pkg │        0        │
+│ /METADATA                                                                        │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/vAwVW17V09lzZsy77iY6y/mcp_types-2.3.0.dist-info/METAD- │ python-pkg │        0        │
+│ ATA                                                                              │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/ynwnE81pbyuCBeJMANBxA/sse_starlette-3.5.1.dist-info/M- │ python-pkg │        0        │
+│ ETADATA                                                                          │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ root/.cache/uv/archive-v0/zE2m4s6NlOexJYmGs9YfP/highspy-1.15.1.dist-info/METADA- │ python-pkg │        0        │
+│ TA                                                                               │            │                 │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ usr/local/lib/python3.12/site-packages/pip-25.0.1.dist-info/METADATA             │ python-pkg │        0        │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ usr/bin/uv                                                                       │ rustbinary │        2        │
+└──────────────────────────────────────────────────────────────────────────────────┴────────────┴─────────────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+
+
+usr/bin/uv (rustbinary)
+=======================
+Total: 2 (HIGH: 2, CRITICAL: 0)
+
+┌───────────────┬─────────────────────┬──────────┬────────┬───────────────────┬───────────────────────────┬─────────────────────────────────────────────────────────────┐
+│    Library    │    Vulnerability    │ Severity │ Status │ Installed Version │       Fixed Version       │                            Title                            │
+├───────────────┼─────────────────────┼──────────┼────────┼───────────────────┼───────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ quinn-proto   │ GHSA-4w2j-m93h-cj5j │ HIGH     │ fixed  │ 0.11.14           │ 0.11.15                   │ Quinn: Remote memory exhaustion in quinn-proto from         │
+│               │                     │          │        │                   │                           │ unbounded out-of-order stream reassembly                    │
+│               │                     │          │        │                   │                           │ https://github.com/advisories/GHSA-4w2j-m93h-cj5j           │
+├───────────────┼─────────────────────┤          │        ├───────────────────┼───────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ rustls-webpki │ GHSA-82j2-j2ch-gfr8 │          │        │ 0.103.9           │ 0.103.13, 0.104.0-alpha.7 │ rustls-webpki: Denial of service via panic on malformed CRL │
+│               │                     │          │        │                   │                           │ BIT STRING                                                  │
+│               │                     │          │        │                   │                           │ https://github.com/advisories/GHSA-82j2-j2ch-gfr8           │
+└───────────────┴─────────────────────┴──────────┴────────┴───────────────────┴───────────────────────────┴─────────────────────────────────────────────────────────────┘
