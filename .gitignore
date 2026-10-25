@@ -11,3 +11,4 @@ dist/
 *.tfstate
 *.tfstate.*
 .DS_Store
+tfplan

@@ -33,3 +33,5 @@ One line per decision: decision — reason.
 - `pipeline.py` retrains only when a new snapshot lands — frequent matchday triggers stay cheap (one bootstrap request).
 - Terraform 1.5.7 pinned in CI to match the local version the configs were validated with; Google provider ~> 8.0 (lock file 8.8.1).
 - GitHub Actions bumped to current majors (checkout v7, setup-uv v10.2.0 (exact tag: the repo has no floating major tags), auth v3, setup-gcloud v3, setup-terraform v4) — fixes the Node 20 deprecation warnings.
+- Dedicated project `fpl-advisor-snf` (user's choice) — isolates cost and makes teardown safe.
+- Budget set as 55 NOK, not 5 USD — the billing account currency is NOK and budgets must match it.
