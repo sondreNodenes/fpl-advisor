@@ -32,4 +32,4 @@ One line per decision: decision — reason.
 - Two Terraform roots: `bootstrap` (human, once: IAM, WIF, registry, bucket) and `app` (CI) — CI's deployer never needs IAM admin rights.
 - `pipeline.py` retrains only when a new snapshot lands — frequent matchday triggers stay cheap (one bootstrap request).
 - Terraform 1.5.7 pinned in CI to match the local version the configs were validated with; Google provider ~> 8.0 (lock file 8.8.1).
-- GitHub Actions bumped to current majors (checkout v7, setup-uv v10, auth v3, setup-gcloud v3, setup-terraform v4) — fixes the Node 20 deprecation warnings.
+- GitHub Actions bumped to current majors (checkout v7, setup-uv v10.2.0 (exact tag: the repo has no floating major tags), auth v3, setup-gcloud v3, setup-terraform v4) — fixes the Node 20 deprecation warnings.
