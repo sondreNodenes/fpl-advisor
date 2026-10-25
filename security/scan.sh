@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Runs every security scan and writes raw reports to $1 (default: security/latest).
+# Runs every security scan plus the abuse tests and writes raw reports to $1
+# (default: security/latest).
 # Needs only docker and uv. STRICT=1 (default) exits non-zero when a gate fails;
 # STRICT=0 only reports (used for the baseline).
 set -uo pipefail
@@ -60,12 +61,18 @@ image() {
 
 # 5. Infrastructure as code (Terraform) and the Dockerfile; accepted risks in .trivyignore.
 iac() {
+  # Full report ignores nothing (accepted risks stay visible); the gate applies .trivyignore.
   trivy config --quiet --skip-dirs '**/.terraform' --skip-dirs .venv --skip-dirs data --skip-files '**/tfplan' \
-    --format json -o "$OUT/trivy-config.json" . &&
+    --ignorefile /dev/null --format json -o "$OUT/trivy-config.json" . &&
     trivy convert --quiet --format table -o "$OUT/trivy-config.txt" "$OUT/trivy-config.json" &&
     trivy config --quiet --skip-dirs '**/.terraform' --skip-dirs .venv --skip-dirs data --skip-files '**/tfplan' \
       --ignorefile .trivyignore --severity HIGH,CRITICAL,MEDIUM --exit-code 1 . \
       >"$OUT/trivy-config-gate.txt" 2>&1
+}
+
+# 6. Abuse and hostile-input tests (rate limits, body limit, SSRF inputs, headers, errors).
+abuse() {
+  uv run -q pytest tests/test_security.py >"$OUT/abuse-tests.txt" 2>&1
 }
 
 gate secrets secrets
@@ -73,6 +80,7 @@ gate dependencies deps
 gate sast sast
 gate image image
 gate iac iac
+gate abuse-tests abuse
 uv run -q python security/summarize.py "$OUT"
 
 if [ ${#failed[@]} -gt 0 ]; then

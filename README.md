@@ -55,6 +55,7 @@ flowchart LR
 | `model.py` | Trains and saves the model; predicts a gameweek (sums double gameweeks, 0 for blanks, × chance of playing) |
 | `evaluate.py` | Season-by-season, time-ordered evaluation against baselines → `RESULTS.md` |
 | `optimize.py` | MILP for transfers now plus an XI and captain for each of the next 3 gameweeks; one solve per transfer count, ranked by net expected points |
+| `security.py` | Rate limits, body size limit, concurrency limit, security headers and CSP, JSON logs |
 | `chips.py` | Chip windows and usage from the API; expected value of each chip per gameweek; play/save verdict |
 | `advisor.py` | Service layer shared by the web app, CLI and MCP server |
 | `app.py`, `static/index.html` | FastAPI and a single dependency-free HTML page |
@@ -153,6 +154,36 @@ GKE or minimum instances.
 
 These are estimates from Google's published free tiers, not measured bills. Set a 5 USD budget alert.
 `make destroy` removes everything Terraform created (the state bucket is kept).
+
+A budget alert does not cap spending. If someone floods the public service from many IPs, the
+measured worst case is about **$930/month** (one instance saturated all month, mostly
+per-request fees; see [Security](#security)).
+
+## Security
+
+A security pass threat-modelled the system, added scanners to CI and hardened the app, the
+container, the pipeline and the cloud setup, with before/after evidence:
+
+- [THREAT_MODEL.md](THREAT_MODEL.md): assets, trust boundaries and STRIDE threats.
+- [SECURITY_FINDINGS.md](SECURITY_FINDINGS.md): every finding with its source, the fix or the
+  reason it is accepted, and per-tool counts before and after.
+- `make security` runs Gitleaks, pip-audit, ruff's bandit rules, Trivy (image and IaC) and the
+  abuse tests in `tests/test_security.py` with pinned tool versions; `.github/workflows/security.yml`
+  runs the same on every push, pull request and weekly.
+
+What the app does on the internet-facing side: only an integer team ID or the exact
+`fantasy.premierleague.com/entry/{id}` URL is accepted and the input is never fetched; 120
+requests/min per IP on every route and 10/min on `/recommend` (429); 4 KiB request bodies (413);
+at most 2 optimizations at once per instance (503 when busy) with a 60 s limit (504); a strict
+Content-Security-Policy with no inline script or style; generic error messages with details only
+in structured logs.
+
+**Kill switch** if the bill alert fires: stop public traffic immediately with
+`gcloud run services update fpl-advisor --region europe-north1 --ingress internal`, or remove
+everything with `make destroy`.
+
+Not done (out of scope or future work): Cloud Armor or another WAF, authentication, an SBOM,
+signed images (cosign) and admission checks, a budget-triggered automatic shutdown.
 
 ## Results
 

@@ -1,0 +1,12 @@
+# Gitleaks: the default rules, plus one narrow allowlist entry.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = """Public OpenPGP fingerprint of the Python 3.12 release manager (ENV GPG_KEY in the
+official python image, used to verify the Python download). Appears in committed Trivy image
+reports. Not a secret: published on python.org."""
+condition = "AND"
+regexTarget = "match"
+regexes = ['''GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305''']
+paths = ['''^security/[^/]+/trivy-image\.json$''']

@@ -13,7 +13,7 @@
 
 - 2026-10-25: 3-gameweek transfer planning, per-swap reasons, chip advice (`chips.py`), dashboard page; screenshot in `docs/`.
 
-- Security pass (SECURITY_BRIEF.md): phase 0 threat model, phase 1 baseline scans (`make security`, `security.yml`, `security/baseline/`), phase 2 app hardening (`security.py`: rate limit, body limit, work limiter, headers/CSP; strict team parsing; safe outbound client), phase 3 container/CI hardening (multi-stage digest-pinned image, SHA-pinned actions, Dependabot, deploy image gate, WIF pinned to repo/owner IDs), phase 4 cloud hardening (bucket versioning/lifecycle, deployer `run.developer` + custom role, default compute Editor removed, max 1 instance, gzip, global per-IP limit, measured worst-case cost) — bootstrap apply pending (BLOCKERS.md).
+- Security pass (SECURITY_BRIEF.md): phase 0 threat model, phase 1 baseline scans (`make security`, `security.yml`, `security/baseline/`), phase 2 app hardening (`security.py`: rate limit, body limit, work limiter, headers/CSP; strict team parsing; safe outbound client), phase 3 container/CI hardening (multi-stage digest-pinned image, SHA-pinned actions, Dependabot, deploy image gate, WIF pinned to repo/owner IDs), phase 4 cloud hardening (bucket versioning/lifecycle, deployer `run.developer` + custom role, default compute Editor removed, max 1 instance, gzip, global per-IP limit, measured worst-case cost) — bootstrap apply pending (BLOCKERS.md), phase 5 proof (`make security` strict incl. abuse tests, `security/after/`, README Security section).
 
 ## Next
 - After GW9 is ingested: re-run `make evaluate` to get the first `ep_next` comparison; update README and CV bullets.

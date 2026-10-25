@@ -6,9 +6,12 @@ line. Threats and their reasoning are in [THREAT_MODEL.md](THREAT_MODEL.md).
 ## How to reproduce
 
 ```bash
-make security                                    # all scans; reports in security/latest/
+make security                                    # all scans + abuse tests; reports in security/latest/
 STRICT=0 security/scan.sh security/baseline      # how the baseline was recorded (report-only)
 ```
+
+The baseline was recorded with the first version of the script (no abuse-test step and
+no `--ignorefile /dev/null`; nothing was ignored then).
 
 `security/scan.sh` needs only Docker and uv. Gitleaks, Trivy and pip-audit run at pinned
 versions (images pinned by digest), so a reviewer gets the same tools.
@@ -29,6 +32,56 @@ Recorded 2026-10-25 against commit `2d0c06b`; raw reports in `security/baseline/
 | trivy config | `infra/` Terraform and `Dockerfile` | 4: 2 MEDIUM, 2 LOW |
 
 Image size (`docker image inspect --format '{{.Size}}'`): 394,508,773 bytes.
+
+## After (hardened)
+
+Recorded 2026-10-25 with `security/scan.sh security/after` (strict mode, all gates pass);
+raw reports in `security/after/`. The bootstrap changes (R-09 to R-13, F-07) are in the
+Terraform code and pass the IaC scan, but are applied to GCP only after the owner runs the
+steps in `BLOCKERS.md`.
+
+| Tool | Before | After | Command |
+|---|---|---|---|
+| gitleaks (secrets, full history) | 0 | 0 (one false positive allow-listed, see below) | `security/scan.sh` → `gitleaks.json` |
+| pip-audit runtime / dev | 0 / 0 | 0 / 0 | → `pip-audit-*.json` |
+| ruff `S` (bandit rules) | 154 (153 S101 in tests, 1 S607) | 0 (S101 ignored in `tests/` only; S607 fixed) | `uv run ruff check --select S .` |
+| trivy image: OS packages | 164 (44 HIGH, 58 MED, 61 LOW, 1 UNK), 0 fixable | 164 (44 HIGH, 58 MED, 61 LOW, 1 UNK), 0 fixable: accepted (F-03) | → `trivy-image.json` |
+| trivy image: Python packages | 6 (5 MED, 1 LOW), 6 fixable | 0 | same |
+| trivy image: `uv` binary | 17 (2 HIGH, 10 MED, 5 LOW), 17 fixable | 0 (not in the image) | same |
+| trivy image: fixable HIGH/CRITICAL (the gate) | 2 | 0 | → `trivy-image-gate.txt` |
+| trivy config (IaC + Dockerfile), nothing ignored | 2 MED, 2 LOW* | 0 MED, 2 LOW (both accepted: F-06, F-09) | → `trivy-config.json` |
+| abuse and hostile-input tests | did not exist | 69 passed | `uv run pytest tests/test_security.py` |
+| image size (bytes) | 394,508,773 | 231,665,207 | `docker image inspect --format '{{.Size}}'` |
+| worst-case monthly bill under a distributed flood | $4,163 (2 instances, no gzip) | $930 (1 instance, gzip) | `python security/load/worst_case_cost.py security/load/results*.txt N` |
+
+\* One baseline MEDIUM (GCP-0077, access logging) came from Trivy reading a stale, gitignored
+`tfplan` file next to the HCL; plan files are now skipped.
+
+**Gitleaks false positive.** After the Trivy reports were committed, Gitleaks flagged
+`GPG_KEY=7169605F…6305` in them (4 hits). That is the public OpenPGP fingerprint of the
+Python 3.12 release manager, set by the official `python` image to verify the Python
+download. Nothing to rotate; `.gitleaks.toml` allows that exact value in `security/*/trivy-image.json`
+only.
+
+### Accepted risks
+
+- **Debian base-image CVEs (F-03):** no fixed packages exist yet; the deploy gate blocks any
+  fixable HIGH/CRITICAL, the weekly scan and Dependabot pick up fixes.
+- **No CMEK, no bucket access logs (F-08, F-09):** public data; admin activity is audited.
+- **Distributed flood cost (R-14):** reduced and measured, not capped. Per-IP limits do not
+  stop many IPs; the budget alert only notifies.
+- **In-memory rate limits:** per instance (now one instance), reset on restart.
+- **`cloudscheduler.admin` and the human `Owner`:** scoped to Scheduler; Owner is needed to
+  apply the foundation.
+
+### What I would do next (not done)
+
+- Cloud Armor (or another WAF) in front of Cloud Run for real rate limiting and bot blocking,
+  or a budget-triggered function that sets ingress to internal: a hard cost cap.
+- Generate an SBOM for each image (Trivy can write CycloneDX) and sign images with cosign,
+  then only allow signed images on Cloud Run (Binary Authorization).
+- Authentication if the service ever handles anything private.
+- Track the scan counts over time from the weekly workflow artifacts.
 
 ## Findings
 

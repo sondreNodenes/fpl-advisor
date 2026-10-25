@@ -56,6 +56,10 @@ def summarize(out: Path) -> dict[str, dict[str, int]]:
         summary["trivy config (IaC, Dockerfile)"] = {
             s: counts[s] for s in SEVERITIES if counts[s]
         } or {"findings": 0}
+    tests = out / "abuse-tests.txt"
+    if tests.exists():
+        last = [line for line in tests.read_text().splitlines() if line.strip()][-1:]
+        summary["abuse tests (tests/test_security.py)"] = {"result": last[0] if last else ""}
     return summary
 
 

@@ -24,9 +24,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: uv sync --locked
-      - name: Scan
-        env:
-          STRICT: "0" # report-only until the baseline is fixed (security phase 5 turns this on)
+      - name: Scan (fails on secrets, CVEs, bandit findings, fixable HIGH/CRITICAL image
+          CVEs, unaccepted IaC findings, or failing abuse tests)
         run: security/scan.sh security/latest
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
