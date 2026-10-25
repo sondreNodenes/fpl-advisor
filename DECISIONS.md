@@ -12,3 +12,10 @@ One line per decision: decision — reason.
 - Opponent strength will be derived from results (rolling goals for/against), not `teams.strength_*` — the API returns 0 for attack/defence strength this season.
 - `free_transfers` is estimated from `entry/{id}/history` (1/GW, roll over to max 5, wildcard/free hit keep count) — the API does not expose it.
 - Snapshots are keyed on the last gameweek with `finished` and `data_checked` both true — bonus points are final only then.
+- Model predicts points per fixture; gameweek points = sum over the player's fixtures — blanks give 0 and doubles two terms without special-casing.
+- Added a 1-GW window to form features — best signal for "will he play"; active-player MAE 1.886 → 1.854 on 2025-26 (scratch experiment, not in repo).
+- Kept HistGradientBoosting; LightGBM tied it on 2025-26 (active Spearman 0.486 vs 0.485), so no extra dependency.
+- Squared-error loss, not absolute — the optimizer needs expected points (mean), not a median that is 0 for most players.
+- Community `xP` dropped as the ep baseline — it ranks 90-minute starters at Spearman 0.59, which only post-deadline information explains (check is reproduced in `evaluate`). `ep_next` baseline comes from our own pre-deadline snapshots instead and fills in from GW9.
+- Availability applied after the model (`× chance_of_playing_next_round`) — it is not recorded historically, so it cannot be a training feature.
+- Kept opponent/team strength features although they add ~nothing over form-only — required by the brief; reported honestly in RESULTS.md.

@@ -15,7 +15,7 @@ from fpl_advisor import ingest
 
 TARGET = "total_points"
 KEYS = ["season", "player_id"]
-WINDOWS = (3, 5)
+WINDOWS = (1, 3, 5)
 
 _PLAYER_STATS = {
     "pts": "total_points",
