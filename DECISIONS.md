@@ -19,3 +19,6 @@ One line per decision: decision — reason.
 - Community `xP` dropped as the ep baseline — it ranks 90-minute starters at Spearman 0.59, which only post-deadline information explains (check is reproduced in `evaluate`). `ep_next` baseline comes from our own pre-deadline snapshots instead and fills in from GW9.
 - Availability applied after the model (`× chance_of_playing_next_round`) — it is not recorded historically, so it cannot be a training feature.
 - Kept opponent/team strength features although they add ~nothing over form-only — required by the brief; reported honestly in RESULTS.md.
+- Selling prices approximated with current prices — the public picks endpoint has no `selling_price` (only the logged-in `my-team` endpoint does); can overstate budget by up to half of any price rise.
+- Optimizer solves once per exact transfer count (0, 1, 2) and ranks plans — gives the user the best option at each count, and ties go to fewer transfers.
+- Vice-captain = second-highest expected starter, chosen after solving — it does not change expected points unless the captain blanks.
