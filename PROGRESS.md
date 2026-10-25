@@ -11,9 +11,10 @@
 - Phase 7: README (architecture, results, limitations), CV_BULLETS.md.
 - Deployed 2026-10-25 to project `fpl-advisor-snf`: https://fpl-advisor-7dembcoibq-lz.a.run.app (health, /recommend, page verified; job run succeeded).
 
+- 2026-10-25: 3-gameweek transfer planning, per-swap reasons, chip advice (`chips.py`), dashboard page; screenshot in `docs/`.
+
 ## Next
 - After GW9 is ingested: re-run `make evaluate` to get the first `ep_next` comparison; update README and CV bullets.
-- Add `docs/screenshot.png`.
 
 ## Known issues
 - Initial data was copied from the local machine to the bucket; the job has not yet written a snapshot on GCS FUSE itself (first chance: after GW8 is final).

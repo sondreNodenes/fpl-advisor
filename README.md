@@ -7,9 +7,13 @@ A Fantasy Premier League advisor. Paste an FPL team URL or ID
 
 1. **Predicted points for every player** for the next gameweek, from a gradient-boosted model
    trained on four past seasons plus the current one.
-2. **Recommended transfers** (0, 1 or 2, net of the 4-point hit), **captain, vice-captain and the
-   best starting XI**, from a mixed-integer program over the full FPL rules (budget, 2/5/5/3 squad,
-   max 3 per club, valid formation, captain scores double).
+2. **Recommended transfers** (0, 1 or 2, net of the 4-point hit) **planned over the next 3
+   gameweeks**, with the reasons behind each swap (expected points per week, fixtures, recent form,
+   injury flags, price), plus **captain, vice-captain and the best starting XI**, from a
+   mixed-integer program over the full FPL rules (budget, 2/5/5/3 squad, max 3 per club, valid
+   formation, captain scores double).
+3. **Chip timing**: the expected extra points from Wildcard, Free Hit, Bench Boost and Triple
+   Captain for each week in the horizon, and whether to play or save each one.
 
 You can use it from a web page, a CLI, a JSON API, or Claude via an MCP server. Data refreshes
 automatically after matches.
@@ -17,7 +21,7 @@ automatically after matches.
 **Live:** https://fpl-advisor-7dembcoibq-lz.a.run.app (Cloud Run, `europe-north1`; the first
 request after idle takes a few seconds while an instance starts).
 
-> _Screenshot placeholder: add `docs/screenshot.png` of the web page here._
+![Dashboard for the test team](docs/screenshot.png)
 
 ## Architecture
 
@@ -50,7 +54,8 @@ flowchart LR
 | `features.py` | Per-fixture rows; rolling 1/3/5-GW and season-to-date form, own and opponent goals/xG for and against |
 | `model.py` | Trains and saves the model; predicts a gameweek (sums double gameweeks, 0 for blanks, × chance of playing) |
 | `evaluate.py` | Season-by-season, time-ordered evaluation against baselines → `RESULTS.md` |
-| `optimize.py` | MILP for transfers, XI and captain; one solve per transfer count, ranked by net expected points |
+| `optimize.py` | MILP for transfers now plus an XI and captain for each of the next 3 gameweeks; one solve per transfer count, ranked by net expected points |
+| `chips.py` | Chip windows and usage from the API; expected value of each chip per gameweek; play/save verdict |
 | `advisor.py` | Service layer shared by the web app, CLI and MCP server |
 | `app.py`, `static/index.html` | FastAPI and a single dependency-free HTML page |
 | `pipeline.py` | Job entrypoint: ingest, then retrain only if a new gameweek landed |
@@ -187,13 +192,17 @@ What this says, plainly:
   include them), so the budget can be slightly optimistic after price rises.
 - **Free transfers are estimated** from transfer history using the current rules (1 per week,
   roll over to 5, wildcard/free hit keep the count). Special mid-season top-ups are not modelled.
-- **One-gameweek horizon.** The optimizer maximises next-gameweek points only, so it can
-  recommend a short-term swap a multi-week planner would not. Chips are out of scope.
+- **Transfers are planned now, not later.** The optimizer picks this week's transfers for the
+  best 3-gameweek total (later weeks weighted 0.9 and 0.81), but does not plan future transfers.
+- **Chip thresholds are rules of thumb** (Wildcard 15, Free Hit 12, Bench Boost 12, Triple
+  Captain 9 expected extra points), not fitted values. Chip values use the same predictions as
+  everything else, and the horizon only sees 3 gameweeks.
 
 ## What I would do next
 
 - Score the model against FPL's `ep_next` as the snapshots accumulate, and report it.
-- Multi-gameweek horizon (3 to 5 gameweeks with decaying weights) in the optimizer.
+- Plan future transfers too (rolling free transfers across the horizon), and a longer
+  horizon for chip timing around known blank and double gameweeks.
 - Use fixture difficulty and bookmaker-implied goal expectations as opponent features, since
   rolling goals and xG proved weak.
 - Model minutes separately (P(start), P(60+)) and multiply by points per 90; most error is

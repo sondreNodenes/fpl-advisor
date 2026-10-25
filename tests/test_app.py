@@ -29,6 +29,11 @@ def test_recommend(client, fake_advisor) -> None:
     assert len(body["squad"]) == 15
     best = body["recommendations"][0]
     assert len(best["starting"]) == 11 and len(best["bench"]) == 4
+    assert len(best["lineups"]) == len(body["gameweeks"]) == 3
+    assert {c["chip"] for c in body["chips"]} == {"wildcard", "freehit", "bboost", "3xc"}
+    for t in best["transfers"]:  # serialised with the "in" alias
+        assert t["in"]["name"] and t["out"]["name"] and t["why"]
+    assert best["starting"][0]["horizon"][0]["gameweek"] == 9
     assert fake_advisor.calls == [("5767275", 8)]
 
 
@@ -53,6 +58,9 @@ def test_recommend_validates_gameweek(client) -> None:
 
 
 def test_predictions(client) -> None:
+    horizon = client.get("/predictions", params={"sort": "horizon", "limit": 3}).json()
+    totals = [p["horizon_points"] for p in horizon["players"]]
+    assert totals == sorted(totals, reverse=True)
     body = client.get("/predictions", params={"position": "MID", "limit": 5}).json()
     assert body["gameweek"] == 9
     assert len(body["players"]) == 5
