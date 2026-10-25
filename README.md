@@ -14,6 +14,9 @@ A Fantasy Premier League advisor. Paste an FPL team URL or ID
 You can use it from a web page, a CLI, a JSON API, or Claude via an MCP server. Data refreshes
 automatically after matches.
 
+**Live:** https://fpl-advisor-7dembcoibq-lz.a.run.app (Cloud Run, `europe-north1`; the first
+request after idle takes a few seconds while an instance starts).
+
 > _Screenshot placeholder: add `docs/screenshot.png` of the web page here._
 
 ## Architecture

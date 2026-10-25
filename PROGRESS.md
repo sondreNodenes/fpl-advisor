@@ -9,13 +9,14 @@
 - Phase 5: `mcp_server.py` with 4 tools, README setup docs.
 - Phase 6: Terraform (bootstrap + app), Dockerfile, `pipeline.py`, deploy workflow; CI validates Terraform.
 - Phase 7: README (architecture, results, limitations), CV_BULLETS.md.
+- Deployed 2026-10-25 to project `fpl-advisor-snf`: https://fpl-advisor-7dembcoibq-lz.a.run.app (health, /recommend, page verified; job run succeeded).
 
 ## Next
-- Human steps in `BLOCKERS.md` (gcloud login, project, billing), then `make bootstrap`, set GitHub variables, deploy, `make run-job`.
 - After GW9 is ingested: re-run `make evaluate` to get the first `ep_next` comparison; update README and CV bullets.
 - Add `docs/screenshot.png`.
 
 ## Known issues
-- Docker image not built locally (Docker daemon was not running); first build happens in the deploy workflow.
+- Initial data was copied from the local machine to the bucket; the job has not yet written a snapshot on GCS FUSE itself (first chance: after GW8 is final).
+- Local `gcloud run ...` commands fail (`No module named 'grpc'`); fix with `gcloud components reinstall`. The REST API and Terraform work.
 - `ep_next` baseline has no rows until a pre-deadline snapshot is followed by that gameweek finishing (first: GW9).
 - Selling prices approximated with current prices.

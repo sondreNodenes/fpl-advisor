@@ -21,7 +21,7 @@ Every number is followed by the command that reproduces it. Numbers come from `R
 - Defined the GCP deployment fully in Terraform (Cloud Run service and scheduled job, Cloud
   Storage, Artifact Registry, least-privilege service accounts) with GitHub Actions CI/CD
   over Workload Identity Federation (no stored keys). Everything scales to zero, with no
-  load balancer, NAT or minimum instances [`make tf-check`; CI workflow `CI`].
+  load balancer, NAT or minimum instances. Deployed at
+  https://fpl-advisor-7dembcoibq-lz.a.run.app [`make tf-check`; CI workflows `CI` and `Deploy`].
 
-_Not yet claimable: a live URL and comparison with FPL's `ep_next`. Add them once
-`BLOCKERS.md` is cleared and GW9 has been ingested._
+_Not yet claimable: comparison with FPL's `ep_next`. Add it once GW9 has been ingested._
