@@ -4,8 +4,8 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 dist/
-data/
-models/
+/data/
+/models/
 .env
 .terraform/
 *.tfstate
