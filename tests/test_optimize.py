@@ -65,6 +65,8 @@ def check_plan(plan: opt.Plan, market: pd.DataFrame, squad: list[int], bank: flo
     earned = df.loc[plan.transfers_out, "price"].sum()
     assert spent <= bank + earned + 1e-6
     assert len(plan.transfers_in) == len(plan.transfers_out) <= 2
+    for out, into in zip(plan.transfers_out, plan.transfers_in, strict=True):
+        assert df.at[out, "element_type"] == df.at[into, "element_type"]
 
     pts = df["predicted_points"]
     expected = pts[plan.starting].sum() + pts[plan.captain]

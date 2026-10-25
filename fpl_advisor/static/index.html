@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FPL Advisor</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --panel: #ffffff; --text: #1d1d1b; --muted: #6b6b66;
+    --line: #e3e3de; --accent: #37003c; --good: #0a7d45; --bad: #b42318;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141414; --panel: #1d1d1d; --text: #ececea; --muted: #a0a09a;
+      --line: #2e2e2c; --accent: #e9c7ff; --good: #4cc38a; --bad: #ff8a80;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  h2 { font-size: 18px; margin: 28px 0 8px; }
+  h3 { font-size: 15px; margin: 16px 0 6px; }
+  p.lead { color: var(--muted); margin: 0 0 20px; }
+  form { display: flex; gap: 8px; flex-wrap: wrap; }
+  input { flex: 1 1 320px; padding: 10px 12px; font: inherit; color: var(--text);
+          background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+  button { padding: 10px 18px; font: inherit; font-weight: 600; border: 0; border-radius: 8px;
+           background: var(--accent); color: var(--bg); cursor: pointer; }
+  button:disabled { opacity: .6; cursor: wait; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+           padding: 16px; margin-top: 16px; }
+  .summary { display: flex; gap: 24px; flex-wrap: wrap; }
+  .summary div span { display: block; color: var(--muted); font-size: 12px; }
+  .summary div strong { font-size: 18px; }
+  .scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line);
+           white-space: nowrap; }
+  th { color: var(--muted); font-weight: 500; font-size: 13px; }
+  td.num, th.num { text-align: right; }
+  .gain { font-weight: 600; }
+  .pos { color: var(--good); } .neg { color: var(--bad); }
+  .tag { font-size: 12px; color: var(--muted); }
+  .error { color: var(--bad); font-weight: 600; }
+  .notes { color: var(--muted); font-size: 13px; padding-left: 18px; }
+  details summary { cursor: pointer; color: var(--muted); margin-top: 8px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>FPL Advisor</h1>
+  <p class="lead">Predicted points for the next gameweek, plus transfers, captain and starting XI for your squad.</p>
+  <form id="form">
+    <input id="team" placeholder="Team ID or URL, e.g. https://fantasy.premierleague.com/entry/5767275/event/8" required>
+    <button id="go" type="submit">Get advice</button>
+  </form>
+  <div id="out"></div>
+</main>
+<script>
+const $ = (sel) => document.querySelector(sel);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = (x, d = 1) => Number(x).toFixed(d);
+
+function playerTable(players, extra = {}) {
+  const rows = players.map((p) => `<tr>
+    <td>${esc(p.name)}${p.id === extra.captain ? " <strong>(C)</strong>" : p.id === extra.vice ? " (V)" : ""}</td>
+    <td>${esc(p.team)}</td><td>${p.position}</td>
+    <td class="num">£${fmt(p.price)}m</td>
+    <td class="num">${fmt(p.predicted_points, 2)}</td>
+    <td class="num">${p.fixtures}</td>
+    <td class="num">${p.availability < 1 ? Math.round(p.availability * 100) + "%" : ""}</td>
+    <td class="num">${p.ep_next ?? ""}</td>
+    <td class="tag">${esc(p.news)}</td></tr>`).join("");
+  return `<div class="scroll"><table><thead><tr><th>Player</th><th>Club</th><th>Pos</th>
+    <th class="num">Price</th><th class="num">Pred. pts</th><th class="num">Fixtures</th>
+    <th class="num">Avail.</th><th class="num">FPL ep</th><th>News</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+
+function render(a) {
+  const best = a.recommendations[0];
+  const recs = a.recommendations.map((r) => {
+    const moves = r.n_transfers
+      ? r.transfers_out.map((p, i) => `${esc(p.name)} → ${esc(r.transfers_in[i].name)}`).join(", ")
+      : "No transfers";
+    const cls = r.gain > 0 ? "pos" : r.gain < 0 ? "neg" : "";
+    return `<tr><td>${r.rank}</td><td>${moves}</td>
+      <td class="num">${fmt(r.net_points)}</td>
+      <td class="num gain ${cls}">${r.gain > 0 ? "+" : ""}${fmt(r.gain)}</td>
+      <td>${esc(r.reason)}</td></tr>`;
+  }).join("");
+  $("#out").innerHTML = `
+    <div class="panel summary">
+      <div><span>Team</span><strong>${esc(a.team_name)}</strong></div>
+      <div><span>Predicting</span><strong>GW${a.gameweek}</strong></div>
+      <div><span>Bank</span><strong>£${fmt(a.bank)}m</strong></div>
+      <div><span>Free transfers</span><strong>${a.free_transfers}</strong></div>
+      <div><span>Captain</span><strong>${esc(best.captain.name)}</strong></div>
+      <div><span>Vice</span><strong>${esc(best.vice_captain.name)}</strong></div>
+    </div>
+    <h2>Recommended transfers</h2>
+    <div class="panel scroll"><table><thead><tr><th>#</th><th>Moves</th>
+      <th class="num">Net exp. pts</th><th class="num">Gain</th><th>Why</th></tr></thead>
+      <tbody>${recs}</tbody></table></div>
+    <h2>Best starting XI (option 1)</h2>
+    <div class="panel">${playerTable(best.starting, {captain: best.captain.id, vice: best.vice_captain.id})}
+      <h3>Bench</h3>${playerTable(best.bench)}</div>
+    <h2>Your current squad</h2>
+    <div class="panel">${playerTable(a.squad)}</div>
+    <ul class="notes">${a.notes.map((n) => `<li>${esc(n)}</li>`).join("")}
+      <li>Form data runs through GW${a.data_through_gameweek}. "Pred. pts" already includes availability; "FPL ep" is FPL's own ep_next.</li></ul>
+    <h2>Top predicted players, GW${a.gameweek}</h2>
+    <div class="panel" id="top">Loading…</div>`;
+  loadTop();
+}
+
+async function loadTop() {
+  try {
+    const r = await fetch("/predictions?limit=30");
+    const d = await r.json();
+    $("#top").innerHTML = r.ok ? playerTable(d.players) : `<span class="error">${esc(d.detail)}</span>`;
+  } catch (e) { $("#top").textContent = "Could not load predictions."; }
+}
+
+$("#form").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const btn = $("#go");
+  btn.disabled = true; btn.textContent = "Working…";
+  $("#out").innerHTML = `<div class="panel">Fetching squad and optimising…</div>`;
+  try {
+    const r = await fetch("/recommend", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({team: $("#team").value}),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : "Invalid request");
+    render(d);
+  } catch (e) {
+    $("#out").innerHTML = `<div class="panel error">${esc(e.message)}</div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = "Get advice";
+  }
+});
+</script>
+</body>
+</html>

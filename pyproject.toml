@@ -5,6 +5,7 @@ description = "Fantasy Premier League advisor: next-gameweek point predictions a
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "fastapi>=0.162.0",
     "highspy>=1.15.1",
     "pandas>=3.1.0",
     "pyarrow>=26.0.0",
@@ -12,10 +13,12 @@ dependencies = [
     "requests>=2.34.2",
     "scikit-learn>=1.9.1",
     "scipy>=1.18.1",
+    "uvicorn>=0.54.0",
 ]
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "pytest>=8",
     "ruff>=0.6",
 ]
@@ -37,3 +40,4 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+filterwarnings = ["ignore:Using `httpx` with `starlette.testclient`"]

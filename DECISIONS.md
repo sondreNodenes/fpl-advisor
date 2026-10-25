@@ -22,3 +22,6 @@ One line per decision: decision — reason.
 - Selling prices approximated with current prices — the public picks endpoint has no `selling_price` (only the logged-in `my-team` endpoint does); can overstate budget by up to half of any price rise.
 - Optimizer solves once per exact transfer count (0, 1, 2) and ranks plans — gives the user the best option at each count, and ties go to fewer transfers.
 - Vice-captain = second-highest expected starter, chosen after solving — it does not change expected points unless the captain blanks.
+- Free hit week: advise on the previous gameweek's squad and bank — the free hit squad reverts.
+- Added `GET /predictions` (top players by position) — the page needs "predicted points for every player" without returning ~670 rows on every `/recommend`.
+- Kept `httpx` for FastAPI's TestClient and silenced Starlette's deprecation warning — the suggested replacement package was not verified, so not installed.

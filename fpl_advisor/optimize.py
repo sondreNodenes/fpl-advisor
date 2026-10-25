@@ -124,9 +124,11 @@ def solve(
     # FPL bench order: outfield players by expected points, then the backup goalkeeper.
     bench.sort(key=lambda p: (df.at[p, "element_type"] == 1, -pts[p]))
     hits = HIT_COST * round(pyo.value(m.extra))
+    # Same position counts go out and in, so sorting both by position pairs the swaps.
+    by_position = lambda p: (df.at[p, "element_type"], -pts[p])  # noqa: E731
     return Plan(
-        transfers_out=sorted(p for p in squad if p not in chosen),
-        transfers_in=sorted(p for p in chosen if p not in in_squad),
+        transfers_out=sorted((p for p in squad if p not in chosen), key=by_position),
+        transfers_in=sorted((p for p in chosen if p not in in_squad), key=by_position),
         starting=starting,
         bench=bench,
         captain=captain,
