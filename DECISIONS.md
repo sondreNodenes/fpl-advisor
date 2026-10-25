@@ -40,3 +40,4 @@ One line per decision: decision — reason.
 - Chip advice added at the user's request (the brief listed chip strategy as out of scope). Values come from the same predictions; play thresholds (WC 15, FH 12, BB 12, TC 9 expected points) are rules of thumb, not fitted; only one chip per gameweek.
 - Chip windows and counts read from bootstrap `chips` (two of each per season since 2025-26), usage from entry history.
 - Optimizer drops dominated players (same position, no cheaper and no better in every week, by a margin of 5 over the position count) before solving — about 3x faster with the same optimum on the test team and a test against unpruned solves.
+- No `prompt_0_fpl_stable.md` exists in the repo; the security pass starts from the deployed state in PROGRESS.md (commit 2d0c06b) and the brief is summarised in `SECURITY_BRIEF.md`.
