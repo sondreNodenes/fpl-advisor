@@ -48,3 +48,6 @@ One line per decision: decision — reason.
 - Concurrency cap of 2 optimizations per instance with a 10 s queue (503 + Retry-After when busy) and a 60 s timeout (504) — each request is CPU-bound for seconds on a 1-vCPU instance; a timed-out job keeps its slot until its thread ends so work cannot pile up.
 - Strict CSP without `unsafe-inline` for the page: script and styles moved to `/static`, bar widths set via CSSOM. `/docs` keeps FastAPI's Swagger UI with a looser CSP (jsDelivr + inline) rather than being removed.
 - Team input: ASCII digits or the exact FPL URL only; IDs bounded to 1..99,999,999 (real IDs are ~1e7) and URL gameweeks to 1..38.
+- Kept `python:3.12-slim` (pinned by digest) instead of a distroless image — distroless Python is 3.11 and the project requires 3.12; the remaining Debian CVEs have no fixed version, so the deploy gate blocks only fixable HIGH/CRITICAL.
+- Deploy workflow scans the built image with Trivy before pushing it — an image with a fixable HIGH/CRITICAL never reaches the registry.
+- Dependabot uses the `uv` ecosystem (the lock file is `uv.lock`) instead of `pip`.

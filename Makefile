@@ -40,10 +40,6 @@ tf-check:
 security:
 	security/scan.sh security/latest
 
-# All security scans (secrets, CVEs, bandit rules, image, IaC); reports in security/latest.
-security:
-	security/scan.sh security/latest
-
 # One-time: state bucket + foundation (see README "Deploy").
 bootstrap:
 	gcloud storage buckets describe gs://$(TF_STATE) >/dev/null 2>&1 || \

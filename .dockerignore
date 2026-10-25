@@ -1,12 +1,9 @@
-.git
-.github
-.venv
-data
-models
-infra
-tests
-**/__pycache__
-.pytest_cache
-.ruff_cache
-*.md
+# Allow-list: only what the image build needs. Everything else (.git, .env, data, models,
+# infra, tests, security reports, editor files) never reaches the build context.
+*
+!pyproject.toml
+!uv.lock
 !README.md
+!fpl_advisor/
+**/__pycache__
+**/*.pyc

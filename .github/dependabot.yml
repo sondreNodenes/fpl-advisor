@@ -1,0 +1,25 @@
+# Weekly update PRs; CI and the security scan run on each one before anything is merged.
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      python:
+        patterns: ["*"]
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+  - package-ecosystem: terraform
+    directories: ["/infra/bootstrap", "/infra/app"]
+    schedule:
+      interval: weekly

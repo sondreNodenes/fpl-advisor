@@ -1,0 +1,5 @@
+# Accepted Trivy findings. Each line has a reason; see SECURITY_FINDINGS.md.
+
+# DS-0026 No HEALTHCHECK: Cloud Run ignores Docker HEALTHCHECK; the service has a startup
+# probe on /health in infra/app/main.tf instead.
+DS-0026

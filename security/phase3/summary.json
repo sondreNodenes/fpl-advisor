@@ -1,0 +1,14 @@
+{
+  "trivy image: debian (fpl-advisor:scan (debian 13.7))": {
+    "HIGH": 44,
+    "MEDIUM": 58,
+    "LOW": 61,
+    "UNKNOWN": 1,
+    "total": 164,
+    "fixable": 0
+  },
+  "trivy image: python-pkg (Python)": {
+    "total": 0,
+    "fixable": 0
+  }
+}

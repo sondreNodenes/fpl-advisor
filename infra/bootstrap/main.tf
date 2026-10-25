@@ -132,7 +132,18 @@ resource "google_storage_bucket_iam_member" "deployer_state" {
   member = google_service_account.deployer.member
 }
 
-# Workload Identity Federation: only the main branch of this repository can deploy.
+# Workload Identity Federation: only pushes to main in this repository can deploy.
+# The condition uses GitHub's numeric repository and owner IDs, which never change; names
+# can be re-registered by someone else if the account or repository is renamed or deleted.
+locals {
+  wif_condition = join(" && ", [
+    "assertion.repository_id == '${var.github_repository_id}'",
+    "assertion.repository_owner_id == '${var.github_owner_id}'",
+    "assertion.ref == 'refs/heads/main'",
+    "assertion.ref_type == 'branch'",
+  ])
+}
+
 resource "google_iam_workload_identity_pool" "github" {
   workload_identity_pool_id = "github"
   display_name              = "GitHub Actions"
@@ -144,18 +155,34 @@ resource "google_iam_workload_identity_pool_provider" "github" {
   workload_identity_pool_provider_id = "github"
   display_name                       = "GitHub OIDC"
   attribute_mapping = {
-    "google.subject"       = "assertion.sub"
-    "attribute.repository" = "assertion.repository"
-    "attribute.ref"        = "assertion.ref"
+    "google.subject"                = "assertion.sub"
+    "attribute.repository"          = "assertion.repository"
+    "attribute.repository_id"       = "assertion.repository_id"
+    "attribute.repository_owner_id" = "assertion.repository_owner_id"
+    "attribute.ref"                 = "assertion.ref"
   }
-  attribute_condition = "assertion.repository == '${var.github_repo}' && assertion.ref == 'refs/heads/main'"
+  attribute_condition = local.wif_condition
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
   }
+
+  lifecycle {
+    # Guard against a refactor silently widening who can deploy.
+    precondition {
+      condition = alltrue([
+        strcontains(local.wif_condition, "assertion.ref == 'refs/heads/main'"),
+        strcontains(local.wif_condition, "assertion.repository_id == '"),
+        strcontains(local.wif_condition, "assertion.repository_owner_id == '"),
+      ])
+      error_message = "The WIF condition must pin repository ID, owner ID and the main branch."
+    }
+  }
 }
 
+# Only identities from this repository ID may act as the deployer (the provider condition
+# above already limits tokens to the main branch).
 resource "google_service_account_iam_member" "github_impersonates_deployer" {
   service_account_id = google_service_account.deployer.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository/${var.github_repo}"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository_id/${var.github_repository_id}"
 }
