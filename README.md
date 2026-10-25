@@ -1,25 +1,78 @@
 # fpl-advisor
 
-Fantasy Premier League advisor. Paste an FPL team URL or ID and get predicted points for every player
-for the next gameweek, plus recommended transfers (0 to 2, net of the 4-point hit), captain,
-vice-captain and the best starting XI.
+[![CI](https://github.com/sondreNodenes/fpl-advisor/actions/workflows/ci.yml/badge.svg)](https://github.com/sondreNodenes/fpl-advisor/actions/workflows/ci.yml)
 
-> Work in progress. See `PROGRESS.md` for status.
+A Fantasy Premier League advisor. Paste an FPL team URL or ID
+(e.g. `https://fantasy.premierleague.com/en/entry/5767275/event/8`) and get:
 
-## What it does
+1. **Predicted points for every player** for the next gameweek, from a gradient-boosted model
+   trained on four past seasons plus the current one.
+2. **Recommended transfers** (0, 1 or 2, net of the 4-point hit), **captain, vice-captain and the
+   best starting XI**, from a mixed-integer program over the full FPL rules (budget, 2/5/5/3 squad,
+   max 3 per club, valid formation, captain scores double).
 
-_TBD (Phase 4)._
+You can use it from a web page, a CLI, a JSON API, or Claude via an MCP server. Data refreshes
+automatically after matches.
+
+> _Screenshot placeholder: add `docs/screenshot.png` of the web page here._
 
 ## Architecture
 
-_TBD (Phase 6)._
+```mermaid
+flowchart LR
+    FPL[(FPL public API)] -->|bootstrap, fixtures,<br/>element-summary| ING
+    COMM[(Community dataset<br/>2022-23 .. 2025-26)] -->|merged_gw.csv| ING
+    subgraph Job["Cloud Run job: fpl-pipeline"]
+        ING[ingest.py<br/>parquet snapshots] --> FEAT[features.py<br/>leakage-safe rolling form,<br/>team strength]
+        FEAT --> MOD[model.py<br/>HistGradientBoosting]
+    end
+    SCHED[Cloud Scheduler<br/>nightly + Fri-Mon evenings] --> Job
+    ING --> GCS[(Cloud Storage<br/>snapshots + model)]
+    MOD --> GCS
+    GCS -->|read-only volume| SVC
+    subgraph SVC["Cloud Run service (scale to zero)"]
+        ADV[advisor.py] --> OPT[optimize.py<br/>Pyomo + HiGHS MILP]
+        API[app.py FastAPI<br/>/recommend /predictions] --> ADV
+    end
+    FPL -->|picks, history,<br/>live prices + injuries| ADV
+    USER([Browser / curl]) --> API
+    CLI([cli.py]) --> ADV
+    CLAUDE([Claude via mcp_server.py]) --> ADV
+```
+
+| Module | Role |
+|---|---|
+| `api.py` | Polite FPL client (1 s between calls, retries, file cache), URL parsing, typed parsers, free-transfer estimate |
+| `ingest.py` | Snapshots each finished gameweek to `data/snapshots/gw=NN/*.parquet` (idempotent); downloads past seasons |
+| `features.py` | Per-fixture rows; rolling 1/3/5-GW and season-to-date form, own and opponent goals/xG for and against |
+| `model.py` | Trains and saves the model; predicts a gameweek (sums double gameweeks, 0 for blanks, × chance of playing) |
+| `evaluate.py` | Season-by-season, time-ordered evaluation against baselines → `RESULTS.md` |
+| `optimize.py` | MILP for transfers, XI and captain; one solve per transfer count, ranked by net expected points |
+| `advisor.py` | Service layer shared by the web app, CLI and MCP server |
+| `app.py`, `static/index.html` | FastAPI and a single dependency-free HTML page |
+| `pipeline.py` | Job entrypoint: ingest, then retrain only if a new gameweek landed |
+| `infra/` | Terraform: `bootstrap` (IAM, WIF, registry, bucket) and `app` (Cloud Run, Scheduler) |
 
 ## Run locally
 
+Requires Python 3.12 and [uv](https://docs.astral.sh/uv/).
+
 ```bash
 uv sync
-make test
-make lint
+make ingest       # snapshot the last finished gameweek + download past seasons (~10 min first time)
+make train        # fit and save models/model.joblib
+make evaluate     # regenerate RESULTS.md
+make run          # http://127.0.0.1:8000
+uv run python -m fpl_advisor.cli "https://fantasy.premierleague.com/en/entry/5767275/event/8"
+make test lint
+```
+
+API:
+
+```bash
+curl -X POST localhost:8000/recommend -H 'content-type: application/json' -d '{"team": "5767275"}'
+curl "localhost:8000/predictions?position=MID&limit=10"
+curl localhost:8000/health
 ```
 
 ## Use from Claude (MCP server)
@@ -95,8 +148,51 @@ These are estimates from Google's published free tiers, not measured bills. Set 
 
 ## Results
 
-_TBD (Phase 2). All numbers will be produced by `python -m fpl_advisor.evaluate`._
+From `RESULTS.md`, produced by `python -m fpl_advisor.evaluate` (re-run it to reproduce).
+Each test season is predicted by a model trained only on earlier seasons. Scores are per
+player per gameweek, for **active players** (played in at least one of their last 3 gameweeks).
+
+| Test season (rows) | Metric | Last-3-GW average | Form-only model | Full model |
+|---|---|---|---|---|
+| 2025-26 (13,533) | MAE ↓ | 2.157 | **1.854** | 1.867 |
+| 2025-26 (13,533) | Spearman ↑ | 0.375 | 0.483 | **0.485** |
+| 2026-27 GW2-7 (2,197) | MAE ↓ | 2.172 | **1.863** | 1.866 |
+| 2026-27 GW2-7 (2,197) | Spearman ↑ | 0.399 | 0.498 | **0.519** |
+
+What this says, plainly:
+
+- Both models clearly beat the last-3-gameweek baseline: 13-14% lower MAE and +0.10 to
+  +0.12 rank correlation.
+- Opponent and home/away context adds little over form alone. The full model ranks slightly
+  better but its MAE is slightly worse. Across all players in 2025-26 it ranks *worse* than
+  form-only (0.725 vs 0.750); see `RESULTS.md`.
+- **No comparison with FPL's own `ep_next` yet.** The API does not keep past `ep_next`
+  values, and the community dataset's `xP` column ranks 90-minute starters at Spearman 0.586,
+  which only post-deadline information can explain, so it is not a fair baseline. The pipeline
+  now snapshots `ep_next` before every deadline, and `evaluate` adds the column automatically
+  once GW9 finishes.
 
 ## Limitations
 
-_TBD._
+- **Unofficial API.** FPL can change or rate-limit endpoints without notice. The client is
+  polite (1 request/s, cached), but a long outage stops ingestion.
+- **Small current-season window.** In-season data is 7 gameweeks. Past seasons help, but
+  player IDs differ per season, so form resets each August.
+- **No injury history in training.** `chance_of_playing_next_round` exists only at snapshot
+  time, so it is applied as a multiplier after the model rather than learned.
+- **Selling prices are approximated** with current prices (the public picks endpoint does not
+  include them), so the budget can be slightly optimistic after price rises.
+- **Free transfers are estimated** from transfer history using the current rules (1 per week,
+  roll over to 5, wildcard/free hit keep the count). Special mid-season top-ups are not modelled.
+- **One-gameweek horizon.** The optimizer maximises next-gameweek points only, so it can
+  recommend a short-term swap a multi-week planner would not. Chips are out of scope.
+
+## What I would do next
+
+- Score the model against FPL's `ep_next` as the snapshots accumulate, and report it.
+- Multi-gameweek horizon (3 to 5 gameweeks with decaying weights) in the optimizer.
+- Use fixture difficulty and bookmaker-implied goal expectations as opponent features, since
+  rolling goals and xG proved weak.
+- Model minutes separately (P(start), P(60+)) and multiply by points per 90; most error is
+  rotation and benching, not scoring.
+- Read real selling prices for authenticated users.
