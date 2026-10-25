@@ -139,4 +139,50 @@ def test_free_transfer_used_without_hit() -> None:
     best = opt.recommend(market, squad, bank=0.0, free_transfers=1)[0]
     assert best.transfers_in == [target]
     assert best.hit_cost == 0
-    assert best.reason == "+1.0 expected points over next gameweek, no hit"
+    assert best.reason == "+1.0 expected points over the next gameweek, no hit"
+
+
+def test_horizon_buys_for_later_weeks() -> None:
+    """A player who blanks next week but scores well after is bought only with a horizon."""
+    market, squad, target = _single_upgrade(gain=3.0)
+    market["w1"] = market["predicted_points"]
+    market.loc[market["player_id"] == target, "w1"] = 0.0  # blank next gameweek
+    market["w2"] = market["predicted_points"]
+    market["w3"] = market["predicted_points"]
+
+    one_week = opt.recommend(market, squad, 0.0, 1, columns=["w1"])[0]
+    assert one_week.n_transfers == 0
+
+    plans = opt.recommend(market, squad, 0.0, 1, columns=["w1", "w2", "w3"], weights=[1, 1, 1])
+    best = plans[0]
+    assert best.transfers_in == [target]
+    assert target in best.bench  # benched in the blank week
+    assert all(target in lu.starting for lu in best.lineups[1:])
+    assert best.gain == pytest.approx(6.0) and best.first_gain == pytest.approx(0.0)
+    assert "over the next 3 gameweeks" in best.reason
+    for lu in best.lineups:
+        assert len(lu.starting) == 11 and lu.captain in lu.starting
+
+
+def test_candidates_drops_only_dominated_players(monkeypatch) -> None:
+    market = random_market(0)
+    squad = random_squad(market, 0)
+    kept = opt.candidates(market, squad, ["predicted_points"])
+    assert set(squad) <= set(kept["player_id"])
+    assert len(kept) < len(market)
+    # Pruning must not change the optimum.
+    pruned = opt.solve(market, squad, 2.0, 2, 2).net_points
+    monkeypatch.setattr(opt, "candidates", lambda players, squad, columns: players)
+    assert opt.solve(market, squad, 2.0, 2, 2).net_points == pytest.approx(pruned)
+
+
+def test_candidates_keeps_one_of_identical_players() -> None:
+    market = random_market(0)
+    gk = market[market["element_type"] == 1].copy()
+    clones = pd.concat([gk.iloc[[0]]] * 12, ignore_index=True)
+    clones["player_id"] = range(1000, 1012)
+    clones[["price", "predicted_points"]] = [3.0, 99.0]  # best and cheapest: dominate others
+    market = pd.concat([market, clones], ignore_index=True)
+    kept = opt.candidates(market, [], ["predicted_points"])
+    n_kept = kept["player_id"].isin(clones["player_id"]).sum()
+    assert n_kept == opt.SQUAD_POSITIONS[1] + opt.DOMINANCE_MARGIN

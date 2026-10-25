@@ -67,12 +67,18 @@ def upcoming_rows(
 ) -> pd.DataFrame:
     """One row per player per fixture in ``gameweek`` (none for a blank, two for a double)."""
     gw = fixtures[fixtures["event"] == gameweek]
+    for col in ("team_h_difficulty", "team_a_difficulty"):
+        if col not in gw:
+            gw = gw.assign(**{col: np.nan})
     sides = pd.concat(
         [
             gw.assign(team=gw["team_h"], opponent_team=gw["team_a"], was_home=True),
             gw.assign(team=gw["team_a"], opponent_team=gw["team_h"], was_home=False),
         ]
-    )[["fixture", "kickoff_time", "team", "opponent_team", "was_home"]]
+    )
+    home = sides["was_home"].astype(bool)
+    sides["difficulty"] = sides["team_h_difficulty"].where(home, sides["team_a_difficulty"])
+    sides = sides[["fixture", "kickoff_time", "team", "opponent_team", "was_home", "difficulty"]]
     rows = players[["player_id", "team", "element_type", "web_name", "price"]].merge(
         sides, on="team"
     )
@@ -110,16 +116,29 @@ def predict_gameweek(
         rows.loc[unseen, features.FORM_FEATURES] = 0.0
 
     rows["pred"] = model.predict(rows[features.FEATURES])
-    per_player = rows.groupby("player_id").agg(
-        n_fixtures=("fixture", "size"), raw_points=("pred", "sum")
+    opponent = zip(rows["opponent_team"], rows["was_home"], rows["difficulty"], strict=True)
+    rows["opponent"] = list(opponent)
+    per_player = (
+        rows.sort_values("kickoff_time")
+        .groupby("player_id")
+        .agg(
+            n_fixtures=("fixture", "size"),
+            raw_points=("pred", "sum"),
+            opponents=("opponent", list),  # (opponent team id, is home, FPL difficulty)
+            form_points=("pts_3", "first"),
+            form_minutes=("min_3", "first"),
+        )
     )
     out = players.set_index("player_id").join(per_player, how="left")
     out["n_fixtures"] = out["n_fixtures"].fillna(0).astype(int)
     out["raw_points"] = out["raw_points"].fillna(0.0)
+    out[["form_points", "form_minutes"]] = out[["form_points", "form_minutes"]].fillna(0.0)
+    out["opponents"] = out["opponents"].map(lambda o: o if isinstance(o, list) else [])
     out["availability"] = availability(out)
     out["predicted_points"] = out["raw_points"] * out["availability"]
     cols = ["web_name", "team", "position", "element_type", "price", "status", "news"]
     cols += ["n_fixtures", "availability", "raw_points", "predicted_points", "ep_next"]
+    cols += ["opponents", "form_points", "form_minutes"]
     return out[[c for c in cols if c in out]].reset_index()
 
 

@@ -34,6 +34,7 @@ def _header(a: Advice) -> dict[str, Any]:
         "team_name": a.team_name,
         "manager": a.manager,
         "gameweek": a.gameweek,
+        "gameweeks": a.gameweeks,
         "bank": a.bank,
         "free_transfers": a.free_transfers,
         "notes": a.notes,
@@ -49,28 +50,33 @@ def get_team(team: str) -> dict[str, Any]:
 
 @server.tool()
 def predict_player(name: str, limit: int = 5) -> dict[str, Any]:
-    """Predicted next-gameweek points for players whose name contains ``name``."""
-    gameweek, preds = advisor.predictions()
+    """Predicted points (next gameweek and the planning horizon) for players matching ``name``."""
+    gameweeks, preds = advisor.forecast()
     query = _fold(name).lower().strip()
     matches = preds[preds["web_name"].map(lambda n: query in _fold(n).lower())]
     ranked = matches.sort_values("predicted_points", ascending=False)["player_id"]
-    players = PlayerView(preds).many(list(ranked[:limit]))
-    return {"gameweek": gameweek, "query": name, "players": players}
+    players = PlayerView(preds, gameweeks).many(list(ranked[:limit]))
+    return {"gameweek": gameweeks[0], "gameweeks": gameweeks, "query": name, "players": players}
 
 
 @server.tool()
 def recommend_transfers(team: str) -> dict[str, Any]:
-    """Ranked transfer plans (0-2 transfers, net of 4-point hits) for an FPL team."""
+    """Ranked transfer plans (0-2 transfers, net of 4-point hits, planned over the next
+    gameweeks) with the reasons for each swap, plus chip timing advice."""
     advice = advisor.advise(team)
     plans = [
-        {
-            k: plan[k]
-            for k in ("rank", "transfers_out", "transfers_in", "hit_cost", "gain", "reason")
+        {k: plan[k] for k in ("rank", "hit_cost", "gain", "first_gain", "reason", "lineups")}
+        | {
+            "transfers": [
+                {"out": t["out"]["name"], "in": t["in"]["name"], "why": t["why"]}
+                for t in plan["transfers"]
+            ],
+            "captain": plan["captain"]["name"],
+            "vice_captain": plan["vice_captain"]["name"],
         }
-        | {"captain": plan["captain"]["name"], "vice_captain": plan["vice_captain"]["name"]}
         for plan in advice.recommendations
     ]
-    return _header(advice) | {"recommendations": plans}
+    return _header(advice) | {"recommendations": plans, "chips": advice.chips}
 
 
 @server.tool()

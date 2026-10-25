@@ -35,3 +35,8 @@ One line per decision: decision — reason.
 - GitHub Actions bumped to current majors (checkout v7, setup-uv v10.2.0 (exact tag: the repo has no floating major tags), auth v3, setup-gcloud v3, setup-terraform v4) — fixes the Node 20 deprecation warnings.
 - Dedicated project `fpl-advisor-snf` (user's choice) — isolates cost and makes teardown safe.
 - Budget set as 55 NOK, not 5 USD — the billing account currency is NOK and budgets must match it.
+- Transfer plans look 3 gameweeks ahead (`HORIZON`): this week's 0-2 transfers, then the squad is held with a new XI and captain each week; later weeks weighted 0.9 and 0.81 — the user asked for planning further ahead; future transfers are not planned (keeps one MILP per transfer count).
+- Each recommended swap carries plain-language reasons (horizon points, fixtures, last-3 form, availability, bench role, price) — the user could not see why a transfer was advised.
+- Chip advice added at the user's request (the brief listed chip strategy as out of scope). Values come from the same predictions; play thresholds (WC 15, FH 12, BB 12, TC 9 expected points) are rules of thumb, not fitted; only one chip per gameweek.
+- Chip windows and counts read from bootstrap `chips` (two of each per season since 2025-26), usage from entry history.
+- Optimizer drops dominated players (same position, no cheaper and no better in every week, by a margin of 5 over the position count) before solving — about 3x faster with the same optimum on the test team and a test against unpruned solves.

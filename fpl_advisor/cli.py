@@ -34,11 +34,15 @@ def format_advice(a: Advice) -> str:
         "Recommendations:",
     ]
     for r in a.recommendations:
-        moves = ", ".join(
-            f"{o['name']} -> {i['name']}"
-            for o, i in zip(r["transfers_out"], r["transfers_in"], strict=True)
-        )
+        moves = ", ".join(f"{t['out']['name']} -> {t['in']['name']}" for t in r["transfers"])
         out.append(f"  {r['rank']}. {moves or 'No transfers'}: {r['reason']}")
+        if r["rank"] == 1:
+            for t in r["transfers"]:
+                out.append(f"     Why {t['out']['name']} -> {t['in']['name']}:")
+                out += [f"       - {line}" for line in t["why"]]
+    if a.chips:
+        out += ["", "Chips:"]
+        out += [f"  {c['name']:<15}{c['verdict']:<12}{c['detail']}" for c in a.chips]
     out += [
         "",
         f"Captain {best['captain']['name']}, vice {best['vice_captain']['name']}",
