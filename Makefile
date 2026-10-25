@@ -44,7 +44,8 @@ security:
 bootstrap:
 	gcloud storage buckets describe gs://$(TF_STATE) >/dev/null 2>&1 || \
 		gcloud storage buckets create gs://$(TF_STATE) --location=$(REGION) --uniform-bucket-level-access
-	gcloud storage buckets update gs://$(TF_STATE) --versioning
+	gcloud storage buckets update gs://$(TF_STATE) --versioning --public-access-prevention \
+		--lifecycle-file=infra/state-lifecycle.json
 	terraform -chdir=infra/bootstrap init -input=false -backend-config="bucket=$(TF_STATE)"
 	terraform -chdir=infra/bootstrap apply -var="project_id=$(PROJECT_ID)" -var="state_bucket=$(TF_STATE)"
 

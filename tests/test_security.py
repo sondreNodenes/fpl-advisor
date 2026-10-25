@@ -157,6 +157,11 @@ def test_rate_limit_returns_429_with_retry_after(client) -> None:
     assert response.json() == {"detail": "Too many requests, slow down"}
 
 
+def test_global_rate_limit_covers_static_routes(client) -> None:
+    codes = [client.get("/health").status_code for _ in range(121)]
+    assert codes[:120] == [200] * 120 and codes[120] == 429
+
+
 def test_rate_limiter_window_and_memory_bound() -> None:
     limiter = security.RateLimiter(limit=2, window=10, max_keys=3)
     assert [limiter.check("a", now=t) for t in (0, 1)] == [0, 0]

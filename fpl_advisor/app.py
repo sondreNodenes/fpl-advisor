@@ -8,6 +8,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -24,6 +25,7 @@ WORK_TIMEOUT_SECONDS = 60.0  # below Cloud Run's 120 s request timeout
 TRUST_PROXY = os.environ.get("FPL_TRUST_PROXY_HEADERS") == "1"
 
 RATE_LIMITS = {  # per client IP per minute
+    ("*", "*"): security.RateLimiter(limit=120, window=60),  # any route, incl. page and static
     ("POST", "/recommend"): security.RateLimiter(limit=10, window=60),
     ("GET", "/predictions"): security.RateLimiter(limit=60, window=60),
 }
@@ -37,6 +39,8 @@ app.add_middleware(
     trust_proxy=TRUST_PROXY,
     logger=log,
 )
+# Compressing the page, script and JSON cuts egress per request (the main flood cost).
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(security.SecurityHeadersMiddleware)  # outermost: also covers 413/429
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 advisor = Advisor()

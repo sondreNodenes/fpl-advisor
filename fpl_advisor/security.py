@@ -134,10 +134,11 @@ class AbuseControlMiddleware:
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
-        limiter = self.limits.get((scope["method"], scope["path"]))
-        if limiter is not None:
-            retry = limiter.check(client_ip(scope, self.trust_proxy))
-            if retry:
+        # ("*", "*") is a limit across all routes; a route can add its own, tighter one.
+        ip = client_ip(scope, self.trust_proxy)
+        for key in (("*", "*"), (scope["method"], scope["path"])):
+            limiter = self.limits.get(key)
+            if limiter is not None and (retry := limiter.check(ip)):
                 self.log.warning("rate limited", extra={"fields": {"path": scope["path"]}})
                 await _error(send, 429, "Too many requests, slow down", retry_after=retry)
                 return

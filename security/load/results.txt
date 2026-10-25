@@ -1,0 +1,7 @@
+# Measured 2026-10-25 with security/load/flood.py (20 processes, 15 s, random X-Forwarded-For) against
+# the hardened image limited to 1 vCPU / 1 GiB, on the owner's laptop. Cloud Run vCPUs differ;
+# treat as an order of magnitude.
+url=http://localhost:8766/health rps=825 wire_bytes_per_request=33 codes={200: 12368}
+url=http://localhost:8766/static/app.js rps=271 wire_bytes_per_request=4411 codes={200: 4060}
+url=http://localhost:8766/ rps=184 wire_bytes_per_request=754 codes={200: 2759}
+single-ip url=/static/app.js seconds=10 codes={200: 120, 429: 3359}

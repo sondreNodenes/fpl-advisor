@@ -60,10 +60,10 @@ image() {
 
 # 5. Infrastructure as code (Terraform) and the Dockerfile; accepted risks in .trivyignore.
 iac() {
-  trivy config --quiet --skip-dirs '**/.terraform' --skip-dirs .venv --skip-dirs data \
+  trivy config --quiet --skip-dirs '**/.terraform' --skip-dirs .venv --skip-dirs data --skip-files '**/tfplan' \
     --format json -o "$OUT/trivy-config.json" . &&
     trivy convert --quiet --format table -o "$OUT/trivy-config.txt" "$OUT/trivy-config.json" &&
-    trivy config --quiet --skip-dirs '**/.terraform' --skip-dirs .venv --skip-dirs data \
+    trivy config --quiet --skip-dirs '**/.terraform' --skip-dirs .venv --skip-dirs data --skip-files '**/tfplan' \
       --ignorefile .trivyignore --severity HIGH,CRITICAL,MEDIUM --exit-code 1 . \
       >"$OUT/trivy-config-gate.txt" 2>&1
 }

@@ -1,0 +1,5 @@
+# Before gzip and the max_instances 2 -> 1 change: same container size and flood.py logic
+# (scratch copy at the time; wire bytes = uncompressed body length). /health with 10 client
+# processes, /static/app.js with 20.
+url=http://localhost:8766/health rps=776 wire_bytes_per_request=33 codes={200: 11639}
+url=http://localhost:8766/static/app.js rps=528 wire_bytes_per_request=13120 codes={200: 7926}

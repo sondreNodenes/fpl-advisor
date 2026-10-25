@@ -51,3 +51,8 @@ One line per decision: decision — reason.
 - Kept `python:3.12-slim` (pinned by digest) instead of a distroless image — distroless Python is 3.11 and the project requires 3.12; the remaining Debian CVEs have no fixed version, so the deploy gate blocks only fixable HIGH/CRITICAL.
 - Deploy workflow scans the built image with Trivy before pushing it — an image with a fixable HIGH/CRITICAL never reaches the registry.
 - Dependabot uses the `uv` ecosystem (the lock file is `uv.lock`) instead of `pip`.
+- Cloud Run `max_instance_count` 2 → 1 — halves the worst-case bill; one instance with 2 optimization slots is plenty for a personal project.
+- GZip middleware (Starlette, no new dependency) — the measured flood cost is dominated by per-request fees and egress; compression cuts egress ~3x per request.
+- Worst-case cost is computed from measured throughput (`security/load/flood.py`, localhost only) and Cloud Billing Catalog SKU prices, not from assumed numbers.
+- Deployer: `run.developer` + custom role (`run.services.setIamPolicy`, `run.jobs.setIamPolicy`) instead of `run.admin`; `cloudscheduler.admin` kept (Scheduler-only permissions, no narrower predefined role covers create/update).
+- CMEK and bucket access logs accepted, not added — public data, cost and complexity with no confidentiality gain.

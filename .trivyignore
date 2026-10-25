@@ -3,3 +3,12 @@
 # DS-0026 No HEALTHCHECK: Cloud Run ignores Docker HEALTHCHECK; the service has a startup
 # probe on /health in infra/app/main.tf instead.
 DS-0026
+
+# GCP-0066 Customer-managed encryption key (CMEK): data is public FPL statistics and a model;
+# Google-managed encryption at rest applies. A KMS key adds cost and key management for no
+# confidentiality gain here.
+GCP-0066
+
+# GCP-0077 Bucket access logging: needs a second log bucket (or paid Data Access audit logs);
+# objects are non-sensitive and admin activity (IAM, bucket changes) is audited by default.
+GCP-0077
