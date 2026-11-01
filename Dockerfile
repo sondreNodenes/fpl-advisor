@@ -2,7 +2,7 @@
 # the app, with no build tools or pip. Base images are pinned by digest (Dependabot bumps).
 FROM ghcr.io/astral-sh/uv:0.11.15@sha256:e590846f4776907b254ac0f44b5b380347af5d90d668138ca7938d1b0c2f98d3 AS uv
 
-FROM python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704 AS build
+FROM python:3.15-slim@sha256:94d3426f1def7db4a106a232ac121bfd975393e5dfd40a619b955fae45fe7913 AS build
 COPY --from=uv /uv /bin/uv
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PROJECT_ENVIRONMENT=/app/.venv \
     UV_PYTHON_DOWNLOADS=never
@@ -13,7 +13,7 @@ COPY fpl_advisor ./fpl_advisor
 # Install the project itself as a regular (non-editable) package inside the venv.
 RUN uv sync --frozen --no-dev --no-editable
 
-FROM python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704
+FROM python:3.15-slim@sha256:94d3426f1def7db4a106a232ac121bfd975393e5dfd40a619b955fae45fe7913
 # pip is not used at runtime and carries its own CVEs; remove it.
 RUN python -m pip uninstall --yes --quiet pip && \
     useradd --system --uid 10001 --no-create-home --shell /usr/sbin/nologin app
